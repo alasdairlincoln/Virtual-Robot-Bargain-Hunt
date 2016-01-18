@@ -23,6 +23,8 @@ class cShop(): # c for Class
 def main():
 
     window = Tk()
+    window.title("Stuff")
+
     canvas = Canvas(window,width=400, height=400, bg="white")
     canvas.pack()
 
