@@ -8,31 +8,43 @@ The whole project :D
 
 from tkinter import *
 
-class cShop(): # c for Class
+def CleanSplit(string):
+    """Splits strings at spaces and newlines
+       used for spliting string that was read from txt file"""
+    lPre = string.rsplit("\n") # l stands for list
+    lFin = []
 
-    def __init__(self,name,location,itemCount):
-        self.name = name
-        self.location = location
-        self.itemCount = itemCount
+    for i in lPre:
+        lFin.append(i.split())
 
-    def __str__(self):
-        return ("This shops name is: " + self.name + "\n" +
-                "Location is: " + self.location + "\n" +
-                "This shop has " + str(self.itemCount) +" items")
+    return lFin
 
 def main():
 
-    window = Tk()
-    window.title("Stuff")
+    file = open("Map.txt","r")
+    fList = CleanSplit(file.read())
+    file.close()
 
-    canvas = Canvas(window,width=400, height=400, bg="white")
+    print(fList)
+
+    window = Tk()
+    window.title("Cat Hunt")
+
+    wWidth = 250
+    wHeight = 250
+    Div = 50
+
+    canvas = Canvas(window,width=wWidth, height=wHeight, bg="white")
     canvas.pack()
 
-    Ob = canvas.create_rectangle(0,0,100,100,fill = "blue")
-
-    Shop = cShop("Shitland","Uranus",20)
-
-    print(Shop)
+    for i in range(int(wHeight/Div)):
+        for j in range(int(wWidth/Div)):
+            x = j * Div
+            y = i * Div
+            if fList[i][j] == "1":
+                Ob = canvas.create_rectangle(x, y, x + Div,y + Div, fill = "blue",outline = "blue")
+            else:
+                Ob = canvas.create_rectangle(x, y, x + Div,y + Div, fill = "Red",outline = "red")
 
     window.mainloop()
 
