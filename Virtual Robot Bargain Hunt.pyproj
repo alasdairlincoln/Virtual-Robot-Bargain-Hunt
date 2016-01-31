@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{535db96c-e1ac-446c-b493-9d3c8eede835}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>Hello.py</StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,7 +21,7 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Hello.py" />
+    <Compile Include="Main.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Map.txt" />
