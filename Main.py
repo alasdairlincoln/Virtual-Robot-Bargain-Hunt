@@ -38,10 +38,15 @@ class GUI:
         if returnOn == True:
             return rect
 
+    def CreateImageRectangle(self,filepath,x,y,anch):
+        photo = PhotoImage(file = filepath)
+        self.__canvas.create_image(x,y,image = photo,anchor = anch)
+        self.__canvas.pack()
+
     def MoveObject(self,ID,nX,nY):
-            # use in conjunction with CreateRectangle with ReturnOn to get ID 
-            self.__canvas.coords(ID, nX, nY, nX + self.__Div, nY + self.__Div,)
-            self.__canvas.update()
+        # use in conjunction with CreateRectangle with ReturnOn to get ID 
+        self.__canvas.coords(ID, nX, nY, nX + self.__Div, nY + self.__Div,)
+        self.__canvas.update()
 
     def Callback(self,event):
         print("pressed " + str(event.keycode))
@@ -112,8 +117,8 @@ def main():
     # ---------
 
     # Reads and displays map
-    mapList = ReadSplit("Map.txt")
-    DisplayMap(gui,mapList,mainCanvasWidth,mainCanvasHeight,mainCanvasDiv)
+    #mapList = ReadSplit("Map.txt")
+    #DisplayMap(gui,mapList,mainCanvasWidth,mainCanvasHeight,mainCanvasDiv)
     # ----------------------
 
     # Make cat into class(OOP)
@@ -124,6 +129,12 @@ def main():
 
     root.bind("<KeyRelease>",gui.Callback)
     frame.pack()
+
+    #photo = PhotoImage(file = "asd.png")
+    gui.CreateImageRectangle("asd.png",0,0,NW)
+    
+    #canvas = gui.GetCanvas()
+    #canvas.create_image(0,0,image = photo,anchor = NW)
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
