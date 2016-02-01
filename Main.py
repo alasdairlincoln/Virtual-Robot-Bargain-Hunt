@@ -38,8 +38,8 @@ class GUI:
         if returnOn == True:
             return rect
 
-    def CreateImageRectangle(self,filepath,x,y,anch):
-        photo = PhotoImage(file = filepath)
+    def CreateImageRectangle(self,photo,x,y,anch):
+        """ Needs a loaded Photo .... """    
         self.__canvas.create_image(x,y,image = photo,anchor = anch)
         self.__canvas.pack()
 
@@ -130,11 +130,8 @@ def main():
     root.bind("<KeyRelease>",gui.Callback)
     frame.pack()
 
-    #photo = PhotoImage(file = "asd.png")
-    gui.CreateImageRectangle("asd.png",0,0,NW)
-    
-    #canvas = gui.GetCanvas()
-    #canvas.create_image(0,0,image = photo,anchor = NW)
+    photo = PhotoImage(file = "asd.png")
+    gui.CreateImageRectangle(photo,0,0,NW)
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
