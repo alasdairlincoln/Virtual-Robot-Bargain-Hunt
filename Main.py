@@ -141,6 +141,8 @@ def main():
     # Setup GUI
     root = Tk()
     gui = GUI(root) # DO NOT USE root past this point, GET MAIN FRAME
+
+    
     gui.CreateCanvas(mainCanvasWidth,mainCanvasHeight,mainCanvasDiv,"black")
     # ---------
 
