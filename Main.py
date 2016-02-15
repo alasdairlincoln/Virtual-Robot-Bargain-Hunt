@@ -1,5 +1,6 @@
 import sys
 from tkinter import *
+from random import *
 
 """Discuss the further development of the program
    Should we make a wrapper for most of the stuff we use, or just the main stuff that is going to be needed for sure like canvas for map...
@@ -72,11 +73,11 @@ class eTextures():
     grass = 0
     path = 1
     cat = 2
+    house = 3
 
 class Map():
     def __init__(self):
         self.mapList = []
-
         self.mapTextures = []    
         
         self.ReadTextures() 
@@ -88,6 +89,7 @@ class Map():
         self.mapTextures.append(PhotoImage(file = "Textures/grass.png"))
         self.mapTextures.append(PhotoImage(file = "Textures/path.png"))
         self.mapTextures.append(PhotoImage(file = "Textures/cat.png"))
+        self.mapTextures.append(PhotoImage(file = "Textures/House.png"))
 
         #print(self.mapTextures)
 
@@ -107,7 +109,6 @@ class Map():
         for i in Pre:
             self.mapList.append(i.split())
 
-
     def DisplayMap(self,gui,h,w,d):
 
         for i in range(int(h / d)):
@@ -123,6 +124,28 @@ class Map():
                     gui.CreateImageRectangle(self.mapTextures[eTextures.path],x,y)
                 else:
                     raise ValueError("Unidentified symbol was found in MapList")
+
+    def PlaceHouse(self,gui, amount, start = False):
+        if start:
+            amount -= 1
+
+        canvas = gui.GetCanvas()
+
+        rInt = randint(1,100) 
+        x,y = canvas.coords(rInt)
+
+        currImage = canvas.itemcget(rInt,"image")
+        #print(canvas.itemcget(rInt,"image") + " " + str(rInt))
+        #print(type(canvas.itemcget(rInt,"image")))
+
+
+        # place only on grass, whitelisting grass, some other might be later
+        if currImage == "pyimage1":
+            house = gui.CreateImageRectangle(self.mapTextures[eTextures.house],x,y,NW,True)
+            if amount > 0:
+                self.PlaceHouse(gui,amount - 1)
+        else:
+            self.PlaceHouse(gui,amount)
 
 def main():
 
@@ -140,19 +163,15 @@ def main():
     map = Map()
     mapList = map.ReadSplit("Map.txt")
     map.DisplayMap(gui,mainCanvasWidth,mainCanvasHeight,mainCanvasDiv)
+    map.PlaceHouse(gui,2,True) # change the number to change the number of houses
     # ----------------------
 
     # Make cat into class(OOP)
     Cat = gui.CreateImageRectangle(map.mapTextures[eTextures.cat],100,100,returnOn = True)
     frame = gui.GetMainFrame()
 
-    #canvas = gui.GetCanvas()
-
     button = Button(frame,text = "Move",command = lambda: gui.MoveObject(Cat,50,50))
     button.pack()
-
-    #root.bind("<KeyRelease>",gui.Callback)
-    #frame.pack()
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
