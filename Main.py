@@ -51,7 +51,6 @@ class GUI:
 
     def UpKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
-
     def GetCanvas(self):
         return self.__canvas
 
