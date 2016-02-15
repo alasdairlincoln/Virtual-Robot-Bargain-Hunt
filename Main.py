@@ -1,18 +1,6 @@
 ﻿import sys
 from tkinter import *
-from random import *
-
-"""Discuss the further development of the program
-   Should we make a wrapper for most of the stuff we use, or just the main stuff that is going to be needed for sure like canvas for map...
-   I feel like create rectangle and other shapes that will be in the game is needed since we need to make the rectangles the same size
-   the button is not rly needed... after much thinking
-   move object is good, needs more wrapper layer to respond to button presses and move accordingly
-   root should not be used, put everything into the frame which is acuired with gui.GetMainFrame()"""
-
-"""Tasks:
-   Make W/A/S/D or arrow keys move the cat
-   Make cat class
-   join implement main menu"""
+from random import * # for random placement of houses 
 
 class GUI:
 
@@ -22,7 +10,7 @@ class GUI:
         self.__frame.pack()
 
         self.__root.title("Cat Hunt")
-
+       
     def CreateCanvas(self,wWidth,wHeight,Div,background = "white"):
         # Creates Canvas
         self.__canvas = Canvas(self.__frame,width = wWidth,height = wHeight,bg = background)
@@ -63,9 +51,6 @@ class GUI:
 
     def UpKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
-
-    def Callback(self,event):
-        print("pressed " + str(event.keycode))
 
     def GetCanvas(self):
         return self.__canvas
