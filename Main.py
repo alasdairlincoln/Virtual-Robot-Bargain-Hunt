@@ -52,9 +52,6 @@ class GUI:
            doesn't require canvas ouside :)"""
         self.__canvas.move(ID,X,Y)
 
-
-
-
     def LeftKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
 
@@ -66,10 +63,6 @@ class GUI:
 
     def UpKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
-
-
-
-
 
     def Callback(self,event):
         print("pressed " + str(event.keycode))
@@ -192,13 +185,10 @@ def main():
     button = Button(frame,text = "Move",command = lambda: gui.MoveObject(Cat,50,50))
     button.pack()
 
-
     root.bind("<Left>", lambda event: gui.LeftKey(Cat,-5,0))
     root.bind("<Right>", lambda event: gui.RightKey(Cat,5,0))
     root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-5))
     root.bind("<Down>", lambda event: gui.DownKey(Cat,0,5))
-
-
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
