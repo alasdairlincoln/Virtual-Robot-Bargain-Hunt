@@ -11,7 +11,7 @@ class GUI:
 
         self.root.title("Cat Hunt")
        
-    def CreateCanvas(self,wWidth,wHeight,Div,background = "white"):
+    def CreateCanvas(self,wWidth = 500, wHeight = 500, Div = 50,background = "white"):
         # Creates Canvas
         self.canvas = Canvas(self.frame,width = wWidth,height = wHeight,bg = background)
         self.canvas.pack()
@@ -80,8 +80,9 @@ class Textures():
         return Textures.TextureDict.keys()
 
 class Map():
-    def __init__(self):
+    def __init__(self,filePath):
         self.mapList = [] 
+        self.ReadSplit(filePath)
 
     def ReadSplit(self,filePath):
         """Reads the map and places into 2D array/list,
@@ -99,7 +100,7 @@ class Map():
         for i in Pre:
             self.mapList.append(i.split())
 
-    def DisplayMap(self,gui,h,w,d):
+    def DisplayMap(self,gui,h = 500, w = 500, d = 50):
 
         for i in range(int(h / d)):
             y = i * d
@@ -117,7 +118,10 @@ class Map():
                 elif self.mapList[i][j] == "4":
                     gui.CreateImageRectangle(Textures.TextureDict["b"],x,y)
                 else:
-                    raise ValueError("Unidentified symbol was found in MapList")    
+                    raise ValueError("Unidentified symbol was found in MapList")
+
+    def Execute(self):
+        print("Base class, not overrode")
 
 class House():
     """If used via CreateHouses then
@@ -156,18 +160,21 @@ class House():
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-def Outside(gui):
+def PreChangeInside(coords,gui,In):
+    """"Takes x,y coords in list,
+        Checks if cat is standing on house and if yes proceeds to inside"""
+    if not House.CheckOverlap(coords[0],coords[1]):
+        In.Execute(gui)
+
+def Outside(gui,In):
     gui.ClearFrame()
-    mCanvasW= 500 # canvas width
-    mCanvasH = 500 # canvas heigh
-    mCanvasD = 50 # determines size of 1 block
+
     hNR = 5 # number of houses in game
-    gui.CreateCanvas(mCanvasW,mCanvasH,mCanvasD,"black")
+    gui.CreateCanvas(background = "black")
 
     # Reads and displays map
-    map = Map()
-    map.ReadSplit("Layouts/Outside Layout.txt")
-    map.DisplayMap(gui,mCanvasW,mCanvasH,mCanvasD)
+    map = Map("Layouts/Outside Layout.txt")
+    map.DisplayMap(gui)
 
     # House part
     House.CreateHouses(gui.GetCanvas(),hNR)
@@ -182,30 +189,23 @@ def Outside(gui):
     gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
     gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50))
 
-    gui.root.bind("<a>",lambda event: Inside(gui)) # changes to inside map 
+    gui.root.bind("<a>",lambda event: PreChangeInside(gui.canvas.coords(Cat),gui,In)) # changes to inside map 
 
-def Inside(gui):
-    gui.ClearFrame()
-    mCanvasW= 500 # canvas width
-    mCanvasH = 500 # canvas heigh
-    mCanvasD = 50 # determines size of 1 block
-    hNR = 5 # number of houses in game
+class Inside(Map):
+    def __init__(self, filePath):
+        super().__init__(filePath)
 
-    gui.CreateCanvas(mCanvasW,mCanvasH,mCanvasD,"black")
+    def Execute(self,gui):
+        gui.ClearFrame()
 
-    map2 = Map()
-    map2.ReadSplit("Layouts/Inside Layout.txt")
-    map2.DisplayMap(gui,mCanvasW,mCanvasH,mCanvasD)
+        gui.CreateCanvas(background = "black")
 
-    gui.root.bind("<a>",lambda event: Outside(gui)) # changes to ouside map
+        self.DisplayMap(gui)
+
+        gui.root.bind("<a>",lambda event: Outside(gui,self)) # changes to ouside map
     
 def main():
-
-    mCanvasW= 500 # canvas width
-    mCanvasH = 500 # canvas heigh
-    mCanvasD = 50 # determines size of 1 block
-    hNR = 5 # number of houses in game
-
+    
     # Setup
     root = Tk()
     gui = GUI(root)  
@@ -213,7 +213,9 @@ def main():
 
     Textures.ReadTexture()
 
-    Outside(gui)
+    map2 = Inside("Layouts/Inside Layout.txt")
+
+    Outside(gui,map2)
 
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
