@@ -5,23 +5,22 @@ from random import * # for random placement of houses
 class GUI:
 
     def __init__(self,root):
-        self.__root = root
-        self.__frame = Frame(self.__root)
-        self.__frame.pack()
+        self.root = root
+        self.frame = Frame(self.root)
+        self.frame.pack()
 
-        self.__root.title("Cat Hunt")
+        self.root.title("Cat Hunt")
        
     def CreateCanvas(self,wWidth,wHeight,Div,background = "white"):
         # Creates Canvas
-        self.__canvas = Canvas(self.__frame,width = wWidth,height = wHeight,bg = background)
-        self.__canvas.pack()
-        self.__Div = Div
-
+        self.canvas = Canvas(self.frame,width = wWidth,height = wHeight,bg = background)
+        self.canvas.pack()
+        self.Div = Div
 
     def CreateRectangle(self,x,y,Fill = "white",Outline = "black", returnOn = False):
         # Wrapper for create rectangle function
-        rect = self.__canvas.create_rectangle(x, y, x + self.__Div,y + self.__Div, fill = Fill,outline = Outline)
-        self.__canvas.pack()
+        rect = self.canvas.create_rectangle(x, y, x + self.Div,y + self.Div, fill = Fill,outline = Outline)
+        self.canvas.pack()
         
         # in case the ractangle as an object its needed else where
         if returnOn == True:
@@ -29,39 +28,39 @@ class GUI:
 
     def CreateImageRectangle(self,photo,x,y,anch = NW,returnOn = False):
         """ Needs a loaded Photo .... """    
-        image = self.__canvas.create_image(x,y,image = photo,anchor = anch)
-        self.__canvas.pack()
-
+        image = self.canvas.create_image(x,y,image = photo,anchor = anch)
+        self.canvas.pack()
+        
         if returnOn == True:
             return image
 
     def MoveObject(self,ID,X,Y):
         """Moves object,
            doesn't require canvas ouside :)"""
-        self.__canvas.move(ID,X,Y)
+        self.canvas.move(ID,X,Y)
 
     def LeftKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
+        self.canvas.move(ID, nX, nY)
 
     def RightKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
+        self.canvas.move(ID, nX, nY)
         
     def DownKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
+        self.canvas.move(ID, nX, nY)
 
     def UpKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
+        self.canvas.move(ID, nX, nY)
     def GetCanvas(self):
-        return self.__canvas
+        return self.canvas
 
     def GetMainFrame(self):
         return self.__frame
 
     def ClearFrame(self):
         # As name suggests, cleats the main frame
-        self.__frame.destroy()
-        self.__frame = Frame(self.__root)
-        self.__frame.pack()
+        self.frame.destroy()
+        self.frame = Frame(self.root)
+        self.frame.pack()
 
 class Textures():
     TextureDict = {} # DICTIONARY POWAAHHH!
@@ -74,6 +73,8 @@ class Textures():
         Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
         Textures.TextureDict["house"] = PhotoImage(file = "Textures/House.png")
+        Textures.TextureDict["a"] = PhotoImage(file = "Textures/pc1.png")
+        Textures.TextureDict["b"] = PhotoImage(file = "Textures/pc2.png")
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
@@ -111,10 +112,12 @@ class Map():
                     gui.CreateImageRectangle(Textures.TextureDict["grass"],x,y)
                 elif self.mapList[i][j] == "2":
                     gui.CreateImageRectangle(Textures.TextureDict["path"],x,y)
+                elif self.mapList[i][j] == "3":
+                    gui.CreateImageRectangle(Textures.TextureDict["a"],x,y)
+                elif self.mapList[i][j] == "4":
+                    gui.CreateImageRectangle(Textures.TextureDict["b"],x,y)
                 else:
-                    raise ValueError("Unidentified symbol was found in MapList")
-
-    
+                    raise ValueError("Unidentified symbol was found in MapList")    
 
 class House():
     """If used via CreateHouses then
@@ -153,25 +156,17 @@ class House():
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-
-def main():
-
+def Outside(gui):
+    gui.ClearFrame()
     mCanvasW= 500 # canvas width
     mCanvasH = 500 # canvas heigh
     mCanvasD = 50 # determines size of 1 block
     hNR = 5 # number of houses in game
-
-    # Setup
-    root = Tk()
-    gui = GUI(root) # DO NOT USE root past this point, GET MAIN FRAME
     gui.CreateCanvas(mCanvasW,mCanvasH,mCanvasD,"black")
-    Textures.ReadTexture()
-    print(Textures.GetTextureKeys())
-    # ---------
 
     # Reads and displays map
     map = Map()
-    map.ReadSplit("Map.txt")
+    map.ReadSplit("Layouts/Outside Layout.txt")
     map.DisplayMap(gui,mCanvasW,mCanvasH,mCanvasD)
 
     # House part
@@ -181,15 +176,45 @@ def main():
 
     # Make cat into class(OOP)
     Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
-    frame = gui.GetMainFrame()
 
-    button = Button(frame,text = "Move",command = lambda: gui.MoveObject(Cat,50,50))
-    button.pack()
+    gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
+    gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0))
+    gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
+    gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50))
 
-    root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
-    root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0))
-    root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
-    root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50))
+    gui.root.bind("<a>",lambda event: Inside(gui)) # changes to inside map 
+
+def Inside(gui):
+    gui.ClearFrame()
+    mCanvasW= 500 # canvas width
+    mCanvasH = 500 # canvas heigh
+    mCanvasD = 50 # determines size of 1 block
+    hNR = 5 # number of houses in game
+
+    gui.CreateCanvas(mCanvasW,mCanvasH,mCanvasD,"black")
+
+    map2 = Map()
+    map2.ReadSplit("Layouts/Inside Layout.txt")
+    map2.DisplayMap(gui,mCanvasW,mCanvasH,mCanvasD)
+
+    gui.root.bind("<a>",lambda event: Outside(gui)) # changes to ouside map
+    
+def main():
+
+    mCanvasW= 500 # canvas width
+    mCanvasH = 500 # canvas heigh
+    mCanvasD = 50 # determines size of 1 block
+    hNR = 5 # number of houses in game
+
+    # Setup
+    root = Tk()
+    gui = GUI(root)  
+    # ---------
+
+    Textures.ReadTexture()
+
+    Outside(gui)
+
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
