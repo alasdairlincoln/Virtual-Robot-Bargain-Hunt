@@ -54,16 +54,24 @@ class GUI:
 
     def LeftKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
+        if self.__canvas.coords(ID) <= [0.0]:
+            self.__canvas.move(ID, -nX, nY)
 
-    def RightKey(self,ID,nX,nY):
+    def RightKey(self,ID,nX,nY, canvasWidth):
         self.__canvas.move(ID, nX, nY)
+        if self.__canvas.coords(ID) >= [canvasWidth-44]:
+            self.__canvas.move(ID, -nX, nY)
         
-    def DownKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
+    def DownKey(self,ID,nX,nY, canvasHeight):
+        self.__canvas.move(ID, nX, nY) 
+        if self.__canvas.coords(ID)[1] >= (canvasHeight-15):
+            self.__canvas.move(ID, nX, -nY)
 
     def UpKey(self,ID,nX,nY):
         self.__canvas.move(ID, nX, nY)
-
+        if self.__canvas.coords(ID)[1] <= -1:
+            self.__canvas.move(ID, nX, -nY)
+        
     def Callback(self,event):
         print("pressed " + str(event.keycode))
 
@@ -159,6 +167,7 @@ class Map():
         else:
             self.PlaceHouse(gui,amount)
 
+
 def main():
 
     mainCanvasWidth = 500
@@ -186,9 +195,9 @@ def main():
     button.pack()
 
     root.bind("<Left>", lambda event: gui.LeftKey(Cat,-5,0))
-    root.bind("<Right>", lambda event: gui.RightKey(Cat,5,0))
+    root.bind("<Right>", lambda event: gui.RightKey(Cat,5,0, mainCanvasWidth))
     root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-5))
-    root.bind("<Down>", lambda event: gui.DownKey(Cat,0,5))
+    root.bind("<Down>", lambda event: gui.DownKey(Cat,0,5,mainCanvasHeight))
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
