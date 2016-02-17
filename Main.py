@@ -28,17 +28,18 @@ class GUI:
 
     def CreateImageRectangle(self,photo,x,y,anch = NW,returnOn = False):
         """ Needs a loaded Photo .... """    
-        image = self.canvas.create_image(x,y,image = photo,anchor = anch)
+        imRect = self.canvas.create_image(x,y,image = photo,anchor = anch)
         self.canvas.pack()
         
         if returnOn == True:
-            return image
+            return imRect
 
     def MoveObject(self,ID,X,Y):
-        """Moves object,
-           doesn't require canvas ouside :)"""
+        """Moves object"""
         self.canvas.move(ID,X,Y)
 
+    # all of this should be in cat class
+    # and use MoveObject from this class
     def LeftKey(self,ID,nX,nY):
         self.canvas.move(ID, nX, nY)
 
@@ -50,11 +51,7 @@ class GUI:
 
     def UpKey(self,ID,nX,nY):
         self.canvas.move(ID, nX, nY)
-    def GetCanvas(self):
-        return self.canvas
-
-    def GetMainFrame(self):
-        return self.__frame
+    # ---------------------------
 
     def ClearFrame(self):
         # As name suggests, cleats the main frame
@@ -86,15 +83,12 @@ class Map():
 
     def ReadSplit(self,filePath):
         """Reads the map and places into 2D array/list,
-           No returns, puts it directly into class"""
+           no returns, puts it directly into class"""
 
-        # Read and close
         file = open(filePath,"r")
         string = file.read()
         file.close()
-        # --------------
 
-        # Splitting
         Pre = string.rsplit("\n")
 
         for i in Pre:
@@ -120,8 +114,61 @@ class Map():
                 else:
                     raise ValueError("Unidentified symbol was found in MapList")
 
-    def Execute(self):
-        print("Base class, not overrode")
+    def Execute():
+        print("BASE CLASS, shit went wrong OR u suck, @execute")
+
+    def preChange():
+        print("BASE CLASS, shit went wrong OR u suck, @change")
+
+class mExterior(Map): # make into class like inside 
+    def __init__(self, filePath):
+        super().__init__(filePath)
+        self.hNR = 5 # number of houses in game
+
+    def Execute(self,gui,dMaps):       
+        gui.ClearFrame()
+        gui.CreateCanvas()
+        
+        self.DisplayMap(gui)
+        House.CreateHouses(gui.canvas,self.hNR)  
+        House.PlaceHouses(gui)
+
+
+        # Make cat into class(OOP)
+        # all of this should be in cat class
+        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+
+        gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
+        gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0))
+        gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
+        gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50))
+        # -------------------------
+
+        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(Cat),gui,dMaps)) # changes to inside map 
+        # <Return> is "enter" key
+
+    def preChange(self,coords,gui,dMaps): # move into one of the classes
+        """Takes x,y coords in list,
+           Checks if cat is standing on house and if yes proceeds to inside"""
+        if not House.CheckOverlap(coords[0],coords[1]):
+            dMaps["inside"].Execute(gui,dMaps)
+
+class mInterior(Map): # adapt for multiple instances
+    def __init__(self, filePath):
+        super().__init__(filePath)
+
+    def Execute(self,gui,dMaps):
+        gui.ClearFrame()
+        gui.CreateCanvas()
+
+        self.DisplayMap(gui)
+
+        gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map
+        # <Return> is "enter" key
+
+    def preChange(self,gui,dMaps):
+        """PLACE HOLDER FOR NOW, goes to another map"""
+        dMaps["outside"].Execute(gui,dMaps)
 
 class House():
     """If used via CreateHouses then
@@ -160,63 +207,23 @@ class House():
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-def PreChangeInside(coords,gui,In): # move into one of the classes
-    """"Takes x,y coords in list,
-        Checks if cat is standing on house and if yes proceeds to inside"""
-    if not House.CheckOverlap(coords[0],coords[1]):
-        In.Execute(gui)
-
-def Outside(gui,In): # make into class like inside 
-    gui.ClearFrame()
-
-    hNR = 5 # number of houses in game
-    gui.CreateCanvas(background = "black")
-
-    # Reads and displays map
-    map = Map("Layouts/Outside Layout.txt")
-    map.DisplayMap(gui)
-
-    # House part
-    House.CreateHouses(gui.GetCanvas(),hNR)
-    House.PlaceHouses(gui)
-    # ----------------------
-
-    # Make cat into class(OOP)
-    Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
-
-    gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
-    gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0))
-    gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
-    gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50))
-
-    gui.root.bind("<a>",lambda event: PreChangeInside(gui.canvas.coords(Cat),gui,In)) # changes to inside map 
-
-class Inside(Map): # adapt for multiple instances
-    def __init__(self, filePath):
-        super().__init__(filePath)
-
-    def Execute(self,gui):
-        gui.ClearFrame()
-
-        gui.CreateCanvas(background = "black")
-
-        self.DisplayMap(gui)
-
-        gui.root.bind("<a>",lambda event: Outside(gui,self)) # changes to ouside map
-    
-def main():
-    
+def main():   
     # Setup
     root = Tk()
-    gui = GUI(root)  
-    # ---------
+    gui = GUI(root) 
 
     Textures.ReadTexture()
 
-    map2 = Inside("Layouts/Inside Layout.txt")
+    dMaps = {}
 
-    Outside(gui,map2)
+    ## add other maps here
+    dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
+    dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
+    # ---------
 
+    # Main Stuff
+    dMaps["outside"].Execute(gui,dMaps)
+    # ----------
 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
