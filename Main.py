@@ -160,13 +160,13 @@ class House():
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-def PreChangeInside(coords,gui,In):
+def PreChangeInside(coords,gui,In): # move into one of the classes
     """"Takes x,y coords in list,
         Checks if cat is standing on house and if yes proceeds to inside"""
     if not House.CheckOverlap(coords[0],coords[1]):
         In.Execute(gui)
 
-def Outside(gui,In):
+def Outside(gui,In): # make into class like inside 
     gui.ClearFrame()
 
     hNR = 5 # number of houses in game
@@ -191,7 +191,7 @@ def Outside(gui,In):
 
     gui.root.bind("<a>",lambda event: PreChangeInside(gui.canvas.coords(Cat),gui,In)) # changes to inside map 
 
-class Inside(Map):
+class Inside(Map): # adapt for multiple instances
     def __init__(self, filePath):
         super().__init__(filePath)
 
