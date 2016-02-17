@@ -1,39 +1,26 @@
 ﻿import sys
 from tkinter import *
-from random import *
-
-"""Discuss the further development of the program
-   Should we make a wrapper for most of the stuff we use, or just the main stuff that is going to be needed for sure like canvas for map...
-   I feel like create rectangle and other shapes that will be in the game is needed since we need to make the rectangles the same size
-   the button is not rly needed... after much thinking
-   move object is good, needs more wrapper layer to respond to button presses and move accordingly
-   root should not be used, put everything into the frame which is acuired with gui.GetMainFrame()"""
-
-"""Tasks:
-   Make W/A/S/D or arrow keys move the cat
-   Make cat class
-   join implement main menu"""
+from random import * # for random placement of houses 
 
 class GUI:
 
     def __init__(self,root):
-        self.__root = root
-        self.__frame = Frame(self.__root)
-        self.__frame.pack()
+        self.root = root
+        self.frame = Frame(self.root)
+        self.frame.pack()
 
-        self.__root.title("Cat Hunt")
-
-    def CreateCanvas(self,wWidth,wHeight,Div,background = "white"):
+        self.root.title("Cat Hunt")
+       
+    def CreateCanvas(self,wWidth = 500, wHeight = 500, Div = 50,background = "white"):
         # Creates Canvas
-        self.__canvas = Canvas(self.__frame,width = wWidth,height = wHeight,bg = background)
-        self.__canvas.pack()
-        self.__Div = Div
-
+        self.canvas = Canvas(self.frame,width = wWidth,height = wHeight,bg = background)
+        self.canvas.pack()
+        self.Div = Div
 
     def CreateRectangle(self,x,y,Fill = "white",Outline = "black", returnOn = False):
         # Wrapper for create rectangle function
-        rect = self.__canvas.create_rectangle(x, y, x + self.__Div,y + self.__Div, fill = Fill,outline = Outline)
-        self.__canvas.pack()
+        rect = self.canvas.create_rectangle(x, y, x + self.Div,y + self.Div, fill = Fill,outline = Outline)
+        self.canvas.pack()
         
         # in case the ractangle as an object its needed else where
         if returnOn == True:
@@ -41,95 +28,89 @@ class GUI:
 
     def CreateImageRectangle(self,photo,x,y,anch = NW,returnOn = False):
         """ Needs a loaded Photo .... """    
-        image = self.__canvas.create_image(x,y,image = photo,anchor = anch)
-        self.__canvas.pack()
-
+        imRect = self.canvas.create_image(x,y,image = photo,anchor = anch)
+        self.canvas.pack()
+        
         if returnOn == True:
-            return image
+            return imRect
 
     def MoveObject(self,ID,X,Y):
-        """Moves object,
-           doesn't require canvas ouside :)"""
-        self.__canvas.move(ID,X,Y)
+        """Moves object"""
+        self.canvas.move(ID,X,Y)
 
+    # all of this should be in cat class
+    # and use MoveObject from this class
     def LeftKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
-        if self.__canvas.coords(ID) <= [0.0]:
-            self.__canvas.move(ID, -nX, nY)
+        try:
+            if not self.canvas.coords(ID)[0] <= 0:
+                self.canvas.move(ID, nX, nY)
+        except:
+            pass
 
     def RightKey(self,ID,nX,nY, canvasWidth):
-        self.__canvas.move(ID, nX, nY)
-        if self.__canvas.coords(ID) >= [canvasWidth-44]:
-            self.__canvas.move(ID, -nX, nY)
+        try:
+            if not self.canvas.coords(ID)[0] >= canvasWidth-50:
+                self.canvas.move(ID, nX, nY)
+        except:
+            pass
         
     def DownKey(self,ID,nX,nY, canvasHeight):
-        self.__canvas.move(ID, nX, nY) 
-        if self.__canvas.coords(ID)[1] >= (canvasHeight-15):
-            self.__canvas.move(ID, nX, -nY)
+        try:
+            if self.canvas.coords(ID)[1] < canvasHeight-50:
+                self.canvas.move(ID, nX, nY)
+        except:
+            pass
 
     def UpKey(self,ID,nX,nY):
-        self.__canvas.move(ID, nX, nY)
-        if self.__canvas.coords(ID)[1] <= -1:
-            self.__canvas.move(ID, nX, -nY)
-        
-    def Callback(self,event):
-        print("pressed " + str(event.keycode))
-
-    def GetCanvas(self):
-        return self.__canvas
-
-    def GetMainFrame(self):
-        return self.__frame
+        try:
+            if self.canvas.coords(ID)[1] > 0:
+                self.canvas.move(ID, nX, nY)
+        except:
+            pass
+    # --------------------------
 
     def ClearFrame(self):
         # As name suggests, cleats the main frame
-        self.__frame.destroy()
-        self.__frame = Frame(self.__root)
-        self.__frame.pack()
+        self.frame.destroy()
+        self.frame = Frame(self.root)
+        self.frame.pack()
 
-class eTextures():
-    """Enum for map textures,
-       Simplyfies the acces of textures, names instead of number"""
-    grass = 0
-    path = 1
-    cat = 2
-    house = 3
+class Textures():
+    TextureDict = {} # DICTIONARY POWAAHHH!
+
+    def ReadTexture():
+        """ Loads textures that are used in game
+            USE ONCE ONLY """
+
+        Textures.TextureDict["grass"] = PhotoImage(file = "Textures/grass.png")
+        Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
+        Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
+        Textures.TextureDict["house"] = PhotoImage(file = "Textures/House.png")
+        Textures.TextureDict["a"] = PhotoImage(file = "Textures/pc1.png")
+        Textures.TextureDict["b"] = PhotoImage(file = "Textures/pc2.png")
+
+    def GetTextureKeys():
+        return Textures.TextureDict.keys()
 
 class Map():
-    def __init__(self):
-        self.mapList = []
-        self.mapTextures = []    
-        
-        self.ReadTextures() 
-
-    def ReadTextures(self):
-        """Loads textures that are used in game"""
-
-        # add each texture ad the end of list and add another variable in class eTextures
-        self.mapTextures.append(PhotoImage(file = "Textures/grass.png"))
-        self.mapTextures.append(PhotoImage(file = "Textures/path.png"))
-        self.mapTextures.append(PhotoImage(file = "Textures/cat.png"))
-        self.mapTextures.append(PhotoImage(file = "Textures/House.png"))
-
-        #print(self.mapTextures)
+    def __init__(self,filePath):
+        self.mapList = [] 
+        self.ReadSplit(filePath)
 
     def ReadSplit(self,filePath):
         """Reads the map and places into 2D array/list,
-           No returns, puts it directly into class"""
+           no returns, puts it directly into class"""
 
-        # Read and close
         file = open(filePath,"r")
         string = file.read()
         file.close()
-        # --------------
 
-        # Splitting
         Pre = string.rsplit("\n")
 
         for i in Pre:
             self.mapList.append(i.split())
 
-    def DisplayMap(self,gui,h,w,d):
+    def DisplayMap(self,gui,h = 500, w = 500, d = 50):
 
         for i in range(int(h / d)):
             y = i * d
@@ -139,66 +120,131 @@ class Map():
                 #add more elif for more options
 
                 if self.mapList[i][j] == "1":
-                    gui.CreateImageRectangle(self.mapTextures[eTextures.grass],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["grass"],x,y)
                 elif self.mapList[i][j] == "2":
-                    gui.CreateImageRectangle(self.mapTextures[eTextures.path],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["path"],x,y)
+                elif self.mapList[i][j] == "3":
+                    gui.CreateImageRectangle(Textures.TextureDict["a"],x,y)
+                elif self.mapList[i][j] == "4":
+                    gui.CreateImageRectangle(Textures.TextureDict["b"],x,y)
                 else:
                     raise ValueError("Unidentified symbol was found in MapList")
 
-    def PlaceHouse(self,gui, amount, start = False):
-        if start:
-            amount -= 1
+    def Execute():
+        print("BASE CLASS, shit went wrong OR u suck, @execute")
 
-        canvas = gui.GetCanvas()
+    def preChange():
+        print("BASE CLASS, shit went wrong OR u suck, @change")
 
-        rInt = randint(1,100) 
-        x,y = canvas.coords(rInt)
+class mExterior(Map): # make into class like inside 
+    def __init__(self, filePath):
+        super().__init__(filePath)
+        self.hNR = 5 # number of houses in game
 
-        currImage = canvas.itemcget(rInt,"image")
-        #print(canvas.itemcget(rInt,"image") + " " + str(rInt))
-        #print(type(canvas.itemcget(rInt,"image")))
+    def Execute(self,gui,dMaps):
+          
+        gui.ClearFrame()
+        gui.CreateCanvas()
+        
+        self.DisplayMap(gui)
+        
+        House.CreateHouses(gui.canvas,self.hNR)
+         
+        House.PlaceHouses(gui)
+        
+
+        # Make cat into class(OOP)
+        # all of this should be in cat class
+        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+
+        gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
+        gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0,500))
+        gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
+        gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50,500))
+        # -------------------------
+
+        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(Cat),gui,dMaps)) # changes to inside map
+        # <Return> is "enter" key
+
+    def preChange(self,coords,gui,dMaps): # move into one of the classes
+        """Takes x,y coords in list,
+           Checks if cat is standing on house and if yes proceeds to inside"""
+        if not House.CheckOverlap(coords[0],coords[1]):
+            dMaps["inside"].Execute(gui,dMaps)
+
+class mInterior(Map): # adapt for multiple instances
+    def __init__(self, filePath):
+        super().__init__(filePath)
+
+    def Execute(self,gui,dMaps):
+        gui.ClearFrame()
+        gui.CreateCanvas()
+
+        self.DisplayMap(gui)
+
+        gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map
+        # <Return> is "enter" key
+
+    def preChange(self,gui,dMaps):
+        """PLACE HOLDER FOR NOW, goes to another map"""
+        dMaps["outside"].Execute(gui,dMaps)
+
+class House():
+    """If used via CreateHouses then
+       It contains list of itself"""
+    HouseList = []
+
+    def __init__(self,x,y,texture):
+        self.x = x
+        self.y = y
+        self.texture = texture
+        self.ID = None
+
+    def CreateHouses(canvas,amount):
+        """Creates specified amount of houses"""
+        
+        while len(House.HouseList) != amount:
+            rInt = randint(1,100) 
+            x,y = canvas.coords(rInt)
+            currImage = canvas.itemcget(rInt,"image")
 
 
-        # place only on grass, whitelisting grass, some other might be later
-        if currImage == "pyimage1":
-            house = gui.CreateImageRectangle(self.mapTextures[eTextures.house],x,y,NW,True)
-            if amount > 0:
-                self.PlaceHouse(gui,amount - 1)
-        else:
-            self.PlaceHouse(gui,amount)
+            # place only on grass and not on another house
+            if currImage == "pyimage1" and House.CheckOverlap(x,y):
+                House.HouseList.append(House(x,y,Textures.TextureDict["house"]))
 
+    def CheckOverlap(x,y):
+        """return true if none of current houses use the spot"""
+        for h in House.HouseList:
+            if h.x == x and h.y == y:
+                return False
+        
+        return True
 
-def main():
+    def PlaceHouses(gui):
+        """places created houses on tkinter canvas,
+           requires gui because it uses its function"""
+        for h in House.HouseList:
+            h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-    mainCanvasWidth = 500
-    mainCanvasHeight = 500
-    mainCanvasDiv = 50
-
-    # Setup GUI
+def main():   
+    # Setup
     root = Tk()
-    gui = GUI(root) # DO NOT USE root past this point, GET MAIN FRAME
-    gui.CreateCanvas(mainCanvasWidth,mainCanvasHeight,mainCanvasDiv,"black")
+    gui = GUI(root) 
+
+    Textures.ReadTexture()
+
+    dMaps = {}
+
+    ## add other maps here
+    dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
+    dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
     # ---------
 
-    # Reads and displays map
-    map = Map()
-    mapList = map.ReadSplit("Map.txt")
-    map.DisplayMap(gui,mainCanvasWidth,mainCanvasHeight,mainCanvasDiv)
-    map.PlaceHouse(gui,2,True) # change the number to change the number of houses
-    # ----------------------
-
-    # Make cat into class(OOP)
-    Cat = gui.CreateImageRectangle(map.mapTextures[eTextures.cat],100,100,returnOn = True)
-    frame = gui.GetMainFrame()
-
-    button = Button(frame,text = "Move",command = lambda: gui.MoveObject(Cat,50,50))
-    button.pack()
-
-    root.bind("<Left>", lambda event: gui.LeftKey(Cat,-5,0))
-    root.bind("<Right>", lambda event: gui.RightKey(Cat,5,0, mainCanvasWidth))
-    root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-5))
-    root.bind("<Down>", lambda event: gui.DownKey(Cat,0,5,mainCanvasHeight))
-
+    # Main Stuff
+    dMaps["outside"].Execute(gui,dMaps)
+    # ----------
+    
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
     
