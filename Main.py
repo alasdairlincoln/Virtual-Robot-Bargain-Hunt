@@ -84,10 +84,11 @@ class Textures():
 
         Textures.TextureDict["grass"] = PhotoImage(file = "Textures/grass.png")
         Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
+        Textures.TextureDict["fenceH"] = PhotoImage(file = "Textures/fenceH.png")
+        Textures.TextureDict["fenceV"] = PhotoImage(file = "Textures/fenceV.png")
+        Textures.TextureDict["tree"] = PhotoImage(file = "Textures/tree.png")
+        Textures.TextureDict["house"] = PhotoImage(file = "Textures/house.png")
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
-        Textures.TextureDict["house"] = PhotoImage(file = "Textures/House.png")
-        Textures.TextureDict["a"] = PhotoImage(file = "Textures/pc1.png")
-        Textures.TextureDict["b"] = PhotoImage(file = "Textures/pc2.png")
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
@@ -124,9 +125,9 @@ class Map():
                 elif self.mapList[i][j] == "2":
                     gui.CreateImageRectangle(Textures.TextureDict["path"],x,y)
                 elif self.mapList[i][j] == "3":
-                    gui.CreateImageRectangle(Textures.TextureDict["a"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["tree"],x,y)
                 elif self.mapList[i][j] == "4":
-                    gui.CreateImageRectangle(Textures.TextureDict["b"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["fenceH"],x,y)
                 else:
                     raise ValueError("Unidentified symbol was found in MapList")
 
@@ -142,16 +143,13 @@ class mExterior(Map): # make into class like inside
         self.hNR = 5 # number of houses in game
 
     def Execute(self,gui,dMaps):
-          
         gui.ClearFrame()
         gui.CreateCanvas()
         
         self.DisplayMap(gui)
         
         House.CreateHouses(gui.canvas,self.hNR)
-         
         House.PlaceHouses(gui)
-        
 
         # Make cat into class(OOP)
         # all of this should be in cat class
@@ -208,7 +206,6 @@ class House():
             x,y = canvas.coords(rInt)
             currImage = canvas.itemcget(rInt,"image")
 
-
             # place only on grass and not on another house
             if currImage == "pyimage1" and House.CheckOverlap(x,y):
                 House.HouseList.append(House(x,y,Textures.TextureDict["house"]))
@@ -218,7 +215,7 @@ class House():
         for h in House.HouseList:
             if h.x == x and h.y == y:
                 return False
-        
+
         return True
 
     def PlaceHouses(gui):
