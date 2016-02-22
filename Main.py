@@ -42,6 +42,10 @@ class GUI:
         
         return check
 
+    def CreateEmptySpace(self, frame,x = 1, y = 5):
+        space = Frame(frame)
+        space.pack(padx = x, pady = y)
+
     def MoveObject(self,ID,X,Y):
         """Moves object"""
         self.canvas.move(ID,X,Y)
