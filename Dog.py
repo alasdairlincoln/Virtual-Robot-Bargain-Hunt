@@ -108,39 +108,6 @@ class Dog:
                     canvas.update()
                 
                 time.sleep(0.03)
-        
-        #WHat is this ? is it needed?
-                """
-        if self.diff == "medium":
-            if self.distance()>10:
-                    vvx,vvy = self.direction()
-                    if vvy != cat_y
-            """
-
-            """vx = 10.0 # x velocity
-            vy = 5.0 # y velocity (speed of the dog)
-            id1 = canvas.create_image(5,10,image = photo, anchor =  NW)
-            cat = canvas.create_image(200,250, image = photo2, anchor = NW)
-            
-            for i in range(1, 500):
-                x,y=canvas.coords(id1)
-                cat_x,cat_y=canvas.coords(cat)
-                if x == cat_y and y == cat_y :
-                    
-                    print("game over")
-                if y < cat_y:
-                    vy = 1.0
-                if y > cat_y:
-                    vy = -1.0
-                if x < cat_x:
-                    vx = 1.0
-                if x > cat_x:
-                    vx = -1.0
-                print(x,cat_x)
-                print(y, cat_y)
-                canvas.coords(id1, x+vx, y + vy)
-                canvas.update()
-                time.sleep(0.01) """
                 
 root = Tk()
 canvas = Canvas(root, width=400, height=300, bg='white')
