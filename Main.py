@@ -1,6 +1,7 @@
 ﻿import sys
 from tkinter import *
 from random import * # for random placement of houses 
+from Dog import *
 
 class GUI:
 
@@ -100,6 +101,7 @@ class Textures():
         Textures.TextureDict["tree"] = PhotoImage(file = "Textures/tree.png")
         Textures.TextureDict["house"] = PhotoImage(file = "Textures/house.png")
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
+        Textures.TextureDict["dog"] = PhotoImage(file = "Textures/dog.png")
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
@@ -165,6 +167,7 @@ class mExterior(Map): # make into class like inside
 
         # Make cat into class(OOP)
         # all of this should be in cat class
+        # RAPLCE WITH NORMAL CAT 
         Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
 
         gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
@@ -191,6 +194,12 @@ class mInterior(Map): # adapt for multiple instances
         gui.CreateCanvas()
 
         self.DisplayMap(gui)
+
+        #REplace with normal cat
+        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+
+        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],Cat)
+        dog.movement(gui)
 
         gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map
         # <Return> is "enter" key
@@ -237,16 +246,22 @@ class House():
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
 
-def MenuMapTrans(diffvar, catname, items,gui,dMaps):
+class Info:
+    name = ""
+    difficulty = ""
+    itemList = []
 
-    list = []
-    for i in items:
-        list.append(i.get())
+    def MenuMapTrans(diffvar, catname, items,gui,dMaps):
 
-    # Change this to send to other classes/functions/places !!!!!!!!
-    print(diffvar.get(),catname.get(),list)
+        list = []
+        for i in items:
+            list.append(i.get())
 
-    dMaps["outside"].Execute(gui,dMaps)
+        Info.name = catname.get()
+        Info.difficulty = diffvar.get()
+        Info.itemList = list
+
+        dMaps["outside"].Execute(gui,dMaps)
 
 def mainmenu(gui,dMaps):
     #title
@@ -300,7 +315,7 @@ def mainmenu(gui,dMaps):
     gui.CreateEmptySpace(gui.frame)
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)
