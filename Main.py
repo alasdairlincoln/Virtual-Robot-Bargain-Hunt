@@ -41,10 +41,6 @@ class GUI:
         
         return check
 
-    def CreateEmptySpace(self, frame,x = 1, y = 5):
-        space = Frame(frame)
-        space.pack(padx = x, pady = y)
-
     def MoveObject(self,ID,X,Y):
         """Moves object"""
         self.canvas.move(ID,X,Y)
@@ -54,7 +50,7 @@ class GUI:
     def LeftKey(self,ID,nX,nY):
         try:
             if not self.canvas.coords(ID)[0] <= 0:
-                self.canvas.move(ID, nX, nY)
+                self.canvas.move(ID, nX, nY)                
         except:
             pass
 
@@ -100,6 +96,13 @@ class Textures():
         Textures.TextureDict["tree"] = PhotoImage(file = "Textures/tree.png")
         Textures.TextureDict["house"] = PhotoImage(file = "Textures/house.png")
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
+        Textures.TextureDict["bush"] = PhotoImage(file = "Textures/bush.png")
+        Textures.TextureDict["floor"] = PhotoImage(file = "Textures/floorboards.png")
+        Textures.TextureDict["books"] = PhotoImage(file = "Textures/bookshelf.png")
+        Textures.TextureDict["table"] = PhotoImage(file = "Textures/table.png")
+        Textures.TextureDict["bed"] = PhotoImage(file = "Textures/bed.png")
+        Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")
+        Textures.TextureDict["box"] = PhotoImage(file = "Textures/box.png")
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
@@ -123,6 +126,7 @@ class Map():
             self.mapList.append(i.split())
 
     def DisplayMap(self,gui,h = 500, w = 500, d = 50):
+
         for i in range(int(h / d)):
             y = i * d
             for j in range(int(w / d)):
@@ -138,8 +142,24 @@ class Map():
                     gui.CreateImageRectangle(Textures.TextureDict["tree"],x,y)
                 elif self.mapList[i][j] == "4":
                     gui.CreateImageRectangle(Textures.TextureDict["fenceH"],x,y)
+                elif self.mapList[i][j] == "5":
+                    gui.CreateImageRectangle(Textures.TextureDict["fenceV"],x,y)
+                elif self.mapList[i][j] == "6":
+                    gui.CreateImageRectangle(Textures.TextureDict["bush"],x,y)
+                elif self.mapList[i][j] == "7":
+                    gui.CreateImageRectangle(Textures.TextureDict["floor"],x,y)
+                elif self.mapList[i][j] == "8":
+                    gui.CreateImageRectangle(Textures.TextureDict["books"],x,y)
+                elif self.mapList[i][j] == "9":
+                    gui.CreateImageRectangle(Textures.TextureDict["table"],x,y)
+                elif self.mapList[i][j] == "10":
+                    gui.CreateImageRectangle(Textures.TextureDict["bed"],x,y)
+                elif self.mapList[i][j] == "11":
+                    gui.CreateImageRectangle(Textures.TextureDict["sofa"],x,y)
+                elif self.mapList[i][j] == "12":
+                    gui.CreateImageRectangle(Textures.TextureDict["box"],x,y)    
                 else:
-                    raise ValueError("Unidentified symbol was found in MapList")
+                    raise ValueError("Unidentified symbol was found in MapList")       
 
     def Execute():
         print("BASE CLASS, shit went wrong OR u suck, @execute")
@@ -152,7 +172,8 @@ class mExterior(Map): # make into class like inside
         super().__init__(filePath)
         self.hNR = 5 # number of houses in game
 
-    def Execute(self,gui,dMaps):       
+    def Execute(self,gui,dMaps):
+          
         gui.ClearFrame()
         gui.CreateCanvas()
         
@@ -162,7 +183,6 @@ class mExterior(Map): # make into class like inside
          
         House.PlaceHouses(gui)
         
-
         # Make cat into class(OOP)
         # all of this should be in cat class
         Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
@@ -236,74 +256,101 @@ class House():
            requires gui because it uses its function"""
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
-
-def MenuMapTrans(diffvar, catname, items,gui,dMaps):
-
-    list = []
-    for i in items:
-        list.append(i.get())
-
-    # Change this to send to other classes/functions/places !!!!!!!!
-    print(diffvar.get(),catname.get(),list)
-
-    dMaps["outside"].Execute(gui,dMaps)
-
 def mainmenu(gui,dMaps):
+    # Setup
+    #root = Tk()
+    #gui = GUI(root) 
+
+    
     #title
-    title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = ("Arial",16) )
+    title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = 'bold' )
     title.pack()
 
-    gui.CreateEmptySpace(gui.frame)
+    #Empty frame for space
+
+    emptyframe1 = Frame(gui.frame)
+    emptyframe1.pack()
+    emptyLable1 = Label(emptyframe1)
+    emptyLable1.pack()
 
     #inputing the cats name
     frame1 = Frame(gui.frame)
-    frame1.pack()
+    frame1.pack( )
 
     catnametext = Label(frame1,text="Cat name?", fg = "blue").pack(side = LEFT)
     catname = Entry(frame1, fg = "blue")
     catname.pack(side = LEFT)
     
-    gui.CreateEmptySpace(gui.frame)
+
+    #space 
+    emptyframe2 = Frame(gui.frame)
+    emptyframe2.pack()
+    emptyLable2 = Label(emptyframe2)
+    emptyLable2.pack()
 
     #Different types of items
+
     framebig =Frame(gui.frame)
     framebig.pack()
-      
-    lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue")
-    lookfor.pack()
 
-    var = []
-    var.append(gui.CreatCheckBox(framebig,"Cat Food"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Toy"))
-    var.append(gui.CreatCheckBox(framebig,"Cat mouse"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Bell"))
-    var.append(gui.CreatCheckBox(framebig,"Cat tail"))
-    var.append(gui.CreatCheckBox(framebig,"Cat book"))
-    var.append(gui.CreatCheckBox(framebig,"Cat shoes"))
+      
+    lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue").pack()
+    var0 = gui.CreatCheckBox(framebig,"Cat Food")
+    var1 = gui.CreatCheckBox(framebig,"Cat Toy")
+    var2 = gui.CreatCheckBox(framebig,"Cat mouse")
+    var3 = gui.CreatCheckBox(framebig,"Cat Bell")
+    var4 = gui.CreatCheckBox(framebig,"Cat tail")
+    var5 = gui.CreatCheckBox(framebig,"Cat book")
+    var6 = gui.CreatCheckBox(framebig,"Cat shoes")
+
+    """frame2 = Frame(gui.frame)
+    frame2.pack()
+
+    lookfor = Label(frame2, text= "What do you wish to look for?", fg="blue").pack()
+    dropdown = StringVar(frame2)
+    dropdown.set("Cat Food") #defult opition
+    dropdown_1 = OptionMenu(frame2, dropdown,"Cat Food","Cat Toys","Mouse","Fish","coke")
+    dropdown_1.pack()
+
+    #space
+    emptyframe3 = Frame(gui.frame)
+    emptyframe3.pack()
+    emptyLable3 = Label(emptyframe3)
+    emptyLable3.pack()"""
+
     
     #select difficutly
+    
     diffvar = IntVar()
         
-    diff = Label(gui.frame, text="Select a difficulty",fg="blue", font = ("Arial",14))
-    diff.pack()
-
+    diff = Label(gui.frame, text="Select a difficulty",fg="blue",font = 'bold').pack()
     frame3 = Frame(gui.frame)
     frame3.pack()
 
-    easy = Radiobutton(frame3, text = "Easy", fg = "green", variable = diffvar, value = 1)
-    easy.pack(side = LEFT,)
-    med = Radiobutton(frame3, text = "Medium", fg = "orange", variable = diffvar, value = 2)
-    med.pack(side = LEFT)
-    hard = Radiobutton(frame3, text = "Hard", fg = "red", variable = diffvar, value = 3)
-    hard.pack(side = LEFT)
+    easy = Radiobutton(frame3, text="Pussy",fg="green",variable = diffvar, value = 1).pack(side = LEFT,)# command =  bla bla
+    med = Radiobutton(frame3, text="Meh...better",fg="orange",variable = diffvar, value = 2).pack(side = LEFT)# command =  bla bla
+    hard =Radiobutton(frame3, text="damn!",fg="red", variable = diffvar, value = 3).pack(side = LEFT)# command =  bla bla
 
-    gui.CreateEmptySpace(gui.frame)
+    #space
+
+    emptyframe4 = Frame(gui.frame)
+    emptyframe4.pack()
+    emptyLable4 = Label(emptyframe4)
+    emptyLable4.pack()
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
+
+    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: dMaps["outside"].Execute(gui,dMaps)) 
     startbutton.pack()
 
-    gui.CreateEmptySpace(gui.frame)
+    #space
+    emptyframe5 = Frame(gui.frame)
+    emptyframe5.pack()
+    emptyLable5 = Label(emptyframe5)
+    emptyLable5.pack()
+
+ 
+    return diffvar,catname.get(), var1
     
 def main():   
     # Setup
@@ -320,7 +367,9 @@ def main():
     # ---------
 
     # Main Stuff
-    mainmenu(gui,dMaps)
+    diff = mainmenu(gui,dMaps)
+    print(diff)
+     
     # ----------
     
     # Mainloop, MUST ALWAYS BE ON BOTTOM
