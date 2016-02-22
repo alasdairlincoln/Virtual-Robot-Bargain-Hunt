@@ -1,7 +1,8 @@
 ﻿import sys
 from tkinter import *
 from random import * # for random placement of houses 
-from Dog import *
+from Dog import Dog
+from Cat import Cat
 
 class GUI:
 
@@ -49,37 +50,6 @@ class GUI:
     def MoveObject(self,ID,X,Y):
         """Moves object"""
         self.canvas.move(ID,X,Y)
-
-    # all of this should be in cat class
-    # and use MoveObject from this class
-    def LeftKey(self,ID,nX,nY):
-        try:
-            if not self.canvas.coords(ID)[0] <= 0:
-                self.canvas.move(ID, nX, nY)                
-        except:
-            pass
-
-    def RightKey(self,ID,nX,nY, canvasWidth):
-        try:
-            if not self.canvas.coords(ID)[0] >= canvasWidth-50:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-        
-    def DownKey(self,ID,nX,nY, canvasHeight):
-        try:
-            if self.canvas.coords(ID)[1] < canvasHeight-50:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-
-    def UpKey(self,ID,nX,nY):
-        try:
-            if self.canvas.coords(ID)[1] > 0:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-    # --------------------------
 
     def ClearFrame(self):
         # As name suggests, cleats the main frame
@@ -178,30 +148,18 @@ class mExterior(Map): # make into class like inside
         super().__init__(filePath)
         self.hNR = 5 # number of houses in game
 
-    def Execute(self,gui,dMaps):
-          
+    def Execute(self,gui,dMaps):  
         gui.ClearFrame()
         gui.CreateCanvas()
         
         self.DisplayMap(gui)
         
-        House.CreateHouses(gui.canvas,self.hNR)
-         
+        House.CreateHouses(gui.canvas,self.hNR)    
         House.PlaceHouses(gui)
-        
-        # Make cat into class(OOP)
-        # all of this should be in cat class
-        # RAPLCE WITH NORMAL CAT 
-        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
 
-        gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
-        gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0,500))
-        gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
-        gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50,500))
-        # -------------------------
+        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],100,100)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(Cat),gui,dMaps)) # changes to inside map
-        # <Return> is "enter" key
+        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps)) # changes to inside map, <Return> is "enter" key
 
     def preChange(self,coords,gui,dMaps): # move into one of the classes
         """Takes x,y coords in list,
@@ -219,14 +177,12 @@ class mInterior(Map): # adapt for multiple instances
 
         self.DisplayMap(gui)
 
-        #REplace with normal cat
-        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],200,200)
 
-        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],Cat)
+        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat.catID)
         dog.movement(gui)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map
-        # <Return> is "enter" key
+        gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map, <Return> is "enter" key
 
     def preChange(self,gui,dMaps):
         """PLACE HOLDER FOR NOW, goes to another map"""
@@ -313,13 +269,13 @@ def mainmenu(gui,dMaps):
     lookfor.pack()
 
     var = []
-    var.append(gui.CreatCheckBox(framebig,"Cat Food"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Toy"))
-    var.append(gui.CreatCheckBox(framebig,"Cat mouse"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Bell"))
-    var.append(gui.CreatCheckBox(framebig,"Cat tail"))
-    var.append(gui.CreatCheckBox(framebig,"Cat book"))
-    var.append(gui.CreatCheckBox(framebig,"Cat shoes"))
+    var.append(gui.CreatCheckBox(framebig,"Food"))
+    var.append(gui.CreatCheckBox(framebig,"Toy"))
+    var.append(gui.CreatCheckBox(framebig,"Mouse"))
+    var.append(gui.CreatCheckBox(framebig,"Bells"))
+    var.append(gui.CreatCheckBox(framebig,"Catnip"))
+    var.append(gui.CreatCheckBox(framebig,"Milk"))
+    var.append(gui.CreatCheckBox(framebig,"Mittens"))
     
     #select difficutly
     diffvar = IntVar()
@@ -340,7 +296,7 @@ def mainmenu(gui,dMaps):
     gui.CreateEmptySpace(gui.frame)
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)
@@ -354,14 +310,12 @@ def main():
 
     dMaps = {}
     
-    ## add other maps here
+    # add other maps here
     dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
     dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
-    # ---------
 
     # Main Stuff
     mainmenu(gui,dMaps)
-    # ----------
     
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
