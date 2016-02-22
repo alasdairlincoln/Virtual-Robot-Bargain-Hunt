@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 
-
+"""IS THIS FILE NEEDED ANYMORE? """
 
 window = Tk()
 #Title
@@ -67,8 +67,6 @@ emptyLable5 = Label(emptyframe5).pack()
 #audio/button
 
 audiobutton = ttk.Button(window, text= "Audio").pack()
-
-
 
 
 
