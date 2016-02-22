@@ -22,7 +22,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dog.py" />
-    <Compile Include="Main menu.py" />
     <Compile Include="Main.py" />
   </ItemGroup>
   <ItemGroup>
