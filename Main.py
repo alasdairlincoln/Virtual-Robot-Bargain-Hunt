@@ -265,10 +265,6 @@ class House():
            requires gui because it uses its function"""
         for h in House.HouseList:
             h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
-def mainmenu(gui,dMaps):
-    # Setup
-    #root = Tk()
-    #gui = GUI(root) 
 
 class Info:
     name = ""
