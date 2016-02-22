@@ -91,10 +91,11 @@ class Textures():
 
         Textures.TextureDict["grass"] = PhotoImage(file = "Textures/grass.png")
         Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
+        Textures.TextureDict["fenceH"] = PhotoImage(file = "Textures/fenceH.png")
+        Textures.TextureDict["fenceV"] = PhotoImage(file = "Textures/fenceV.png")
+        Textures.TextureDict["tree"] = PhotoImage(file = "Textures/tree.png")
+        Textures.TextureDict["house"] = PhotoImage(file = "Textures/house.png")
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
-        Textures.TextureDict["house"] = PhotoImage(file = "Textures/House.png")
-        Textures.TextureDict["a"] = PhotoImage(file = "Textures/pc1.png")
-        Textures.TextureDict["b"] = PhotoImage(file = "Textures/pc2.png")
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
@@ -131,9 +132,9 @@ class Map():
                 elif self.mapList[i][j] == "2":
                     gui.CreateImageRectangle(Textures.TextureDict["path"],x,y)
                 elif self.mapList[i][j] == "3":
-                    gui.CreateImageRectangle(Textures.TextureDict["a"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["tree"],x,y)
                 elif self.mapList[i][j] == "4":
-                    gui.CreateImageRectangle(Textures.TextureDict["b"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["fenceH"],x,y)
                 else:
                     raise ValueError("Unidentified symbol was found in MapList")
 
@@ -270,8 +271,7 @@ def mainmenu(gui,dMaps):
     framebig =Frame(gui.frame)
     framebig.pack()
 
-    
-    
+      
     lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue").pack()
     var0 = gui.CreatCheckBox(framebig,"Cat Food")
     var1 = gui.CreatCheckBox(framebig,"Cat Toy")
@@ -280,16 +280,6 @@ def mainmenu(gui,dMaps):
     var4 = gui.CreatCheckBox(framebig,"Cat tail")
     var5 = gui.CreatCheckBox(framebig,"Cat book")
     var6 = gui.CreatCheckBox(framebig,"Cat shoes")
-
-    
-    
-    
-    
-
-   
-
-
-    
 
     """frame2 = Frame(gui.frame)
     frame2.pack()
@@ -310,9 +300,7 @@ def mainmenu(gui,dMaps):
     #select difficutly
     
     diffvar = IntVar()
-    
-
-    
+        
     diff = Label(gui.frame, text="Select a difficulty",fg="blue",font = 'bold').pack()
     frame3 = Frame(gui.frame)
     frame3.pack()
@@ -347,13 +335,10 @@ def main():
     root = Tk()
     gui = GUI(root)
 
-    
-
     Textures.ReadTexture()
 
     dMaps = {}
     
-
     ## add other maps here
     dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
     dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
@@ -362,8 +347,7 @@ def main():
     # Main Stuff
     diff = mainmenu(gui,dMaps)
     print(diff)
-   
-    
+     
     # ----------
     
     # Mainloop, MUST ALWAYS BE ON BOTTOM
