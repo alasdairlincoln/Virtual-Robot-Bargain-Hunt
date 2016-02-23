@@ -1,7 +1,8 @@
 ﻿import sys
 from tkinter import *
 from random import * # for random placement of houses 
-from Dog import *
+from Dog import Dog
+from Cat import Cat
 
 class GUI:
 
@@ -13,7 +14,6 @@ class GUI:
         self.root.title("Cat Hunt")
        
     def CreateCanvas(self,wWidth = 500, wHeight = 500, Div = 50,background = "white"):
-        # Creates Canvas
         self.canvas = Canvas(self.frame,width = wWidth,height = wHeight,bg = background)
         self.canvas.pack()
         self.Div = Div
@@ -23,7 +23,7 @@ class GUI:
         rect = self.canvas.create_rectangle(x, y, x + self.Div,y + self.Div, fill = Fill,outline = Outline)
         self.canvas.pack()
         
-        # in case the ractangle as an object its needed else where
+        # Returns object ID
         if returnOn == True:
             return rect
 
@@ -32,6 +32,7 @@ class GUI:
         imRect = self.canvas.create_image(x,y,image = photo,anchor = anch)
         self.canvas.pack()
         
+        # Returns object ID
         if returnOn == True:
             return imRect
 
@@ -47,42 +48,9 @@ class GUI:
         space.pack(padx = x, pady = y)
 
     def MoveObject(self,ID,X,Y):
-        """Moves object"""
         self.canvas.move(ID,X,Y)
 
-    # all of this should be in cat class
-    # and use MoveObject from this class
-    def LeftKey(self,ID,nX,nY):
-        try:
-            if not self.canvas.coords(ID)[0] <= 0:
-                self.canvas.move(ID, nX, nY)                
-        except:
-            pass
-
-    def RightKey(self,ID,nX,nY, canvasWidth):
-        try:
-            if not self.canvas.coords(ID)[0] >= canvasWidth-50:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-        
-    def DownKey(self,ID,nX,nY, canvasHeight):
-        try:
-            if self.canvas.coords(ID)[1] < canvasHeight-50:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-
-    def UpKey(self,ID,nX,nY):
-        try:
-            if self.canvas.coords(ID)[1] > 0:
-                self.canvas.move(ID, nX, nY)
-        except:
-            pass
-    # --------------------------
-
     def ClearFrame(self):
-        # As name suggests, cleats the main frame
         self.frame.destroy()
         self.frame = Frame(self.root)
         self.frame.pack()
@@ -95,6 +63,7 @@ class Textures():
             USE ONCE ONLY """
 
         Textures.TextureDict["grass"] = PhotoImage(file = "Textures/grass.png")
+        Textures.TextureDict["box"] = PhotoImage(file = "Textures/box.png")
         Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
         Textures.TextureDict["fenceH"] = PhotoImage(file = "Textures/fenceH.png")
         Textures.TextureDict["fenceV"] = PhotoImage(file = "Textures/fenceV.png")
@@ -107,16 +76,20 @@ class Textures():
         Textures.TextureDict["books"] = PhotoImage(file = "Textures/bookshelf.png")
         Textures.TextureDict["table"] = PhotoImage(file = "Textures/table.png")
         Textures.TextureDict["bed"] = PhotoImage(file = "Textures/bed.png")
-        Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")
-        Textures.TextureDict["box"] = PhotoImage(file = "Textures/box.png")
+        Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")  
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
+
+    def TextStr(textureName):
+        return str(Textures.TextureDict[textureName])
 
 class Map():
     def __init__(self,filePath):
         self.mapList = [] 
         self.ReadSplit(filePath)
+        self.ExitX = 0
+        self.ExitY = 0
 
     def ReadSplit(self,filePath):
         """Reads the map and places into 2D array/list,
@@ -162,6 +135,9 @@ class Map():
                     gui.CreateImageRectangle(Textures.TextureDict["bed"],x,y)
                 elif self.mapList[i][j] == "11":
                     gui.CreateImageRectangle(Textures.TextureDict["sofa"],x,y)
+                    # add some kind of exit for outside
+                    self.ExitX = x 
+                    self.ExitY = y
                 elif self.mapList[i][j] == "12":
                     gui.CreateImageRectangle(Textures.TextureDict["box"],x,y)    
                 else:
@@ -176,106 +152,104 @@ class Map():
 class mExterior(Map): # make into class like inside 
     def __init__(self, filePath):
         super().__init__(filePath)
-        self.hNR = 5 # number of houses in game
 
-    def Execute(self,gui,dMaps):
-          
+    def Execute(self,gui,dMaps,dObjects):  
         gui.ClearFrame()
         gui.CreateCanvas()
         
         self.DisplayMap(gui)
         
-        House.CreateHouses(gui.canvas,self.hNR)
-         
-        House.PlaceHouses(gui)
-        
-        # Make cat into class(OOP)
-        # all of this should be in cat class
-        # RAPLCE WITH NORMAL CAT 
-        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+        dObjects["houses"].CreateObjects(gui.canvas,5,"house","grass")
+        dObjects["houses"].PlaceAllObjects(gui)
 
-        gui.root.bind("<Left>", lambda event: gui.LeftKey(Cat,-50,0))
-        gui.root.bind("<Right>", lambda event: gui.RightKey(Cat,50,0,500))
-        gui.root.bind("<Up>", lambda event: gui.UpKey(Cat,0,-50))
-        gui.root.bind("<Down>", lambda event: gui.DownKey(Cat,0,50,500))
-        # -------------------------
+        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],100,100)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(Cat),gui,dMaps)) # changes to inside map
-        # <Return> is "enter" key
+        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,dObjects["houses"],dObjects)) # changes to inside map, <Return> is "enter" key
 
-    def preChange(self,coords,gui,dMaps): # move into one of the classes
+    def preChange(self,coords,gui,dMaps,House,dObjects): # move into one of the classes
         """Takes x,y coords in list,
            Checks if cat is standing on house and if yes proceeds to inside"""
         if not House.CheckOverlap(coords[0],coords[1]):
-            dMaps["inside"].Execute(gui,dMaps)
+            dMaps["inside"].Execute(gui,dMaps,dObjects)
 
 class mInterior(Map): # adapt for multiple instances
     def __init__(self, filePath):
         super().__init__(filePath)
 
-    def Execute(self,gui,dMaps):
+    def Execute(self,gui,dMaps,dObjects):
         gui.ClearFrame()
         gui.CreateCanvas()
 
         self.DisplayMap(gui)
 
-        #REplace with normal cat
-        Cat = gui.CreateImageRectangle(Textures.TextureDict["cat"],100,100,returnOn = True)
+        
+        dObjects["boxes"].CreateObjects(gui.canvas,5,"box","floor")
+        dObjects["boxes"].PlaceAllObjects(gui)
 
-        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],Cat)
+        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
+
+        gui.root.bind("<Return>",lambda event: self.preChange(cat.catID,gui,dMaps,dObjects)) # changes to ouside map, <Return> is "enter" key
+
+        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat.catID)
         dog.movement(gui)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(gui,dMaps)) # changes to ouside map
-        # <Return> is "enter" key
+    def preChange(self,cat,gui,dMaps,dObjects):
+        """changes into outside when on sofa only :D"""
+        x,y = gui.canvas.coords(cat)
+        #if gui.canvas.itemcget(gui.canvas.find_overlapping(x,y,x+50,y+50)[0],"image") == str(Textures.TextureDict["sofa"]):
+        if x == self.ExitX and y == self.ExitY:
+            dMaps["outside"].Execute(gui,dMaps,dObjects)
 
-    def preChange(self,gui,dMaps):
-        """PLACE HOLDER FOR NOW, goes to another map"""
-        dMaps["outside"].Execute(gui,dMaps)
-
-class House():
-    """If used via CreateHouses then
-       It contains list of itself"""
-    HouseList = []
-
+class Obj:
     def __init__(self,x,y,texture):
         self.x = x
         self.y = y
         self.texture = texture
         self.ID = None
 
-    def CreateHouses(canvas,amount):
-        """Creates specified amount of houses"""
+class BaseRandomObject:
+    """Random object Base class"""
+    def __init__(self):
+        self.List = []
+
+    def PlaceObject(self,gui,i):
+        """places created object on tkinter canvas,
+           requires gui"""
+        self.List[i].ID = gui.CreateImageRectangle(self.List[i].texture,self.List[i].x,self.List[i].y,returnOn = True)
+
+    def CreateObjects(self,canvas,amount,texture,chkImage):
+        """Creates specified amount of objects"""
         
-        while len(House.HouseList) != amount:
+        while len(self.List) != amount:
             rInt = randint(1,100) 
             x,y = canvas.coords(rInt)
             currImage = canvas.itemcget(rInt,"image")
+            #print(currImage)
 
+            # Only place on specific tile and not overlap
+            if currImage == Textures.TextStr(chkImage) and self.CheckOverlap(x,y):
+                self.List.append(Obj(x,y,Textures.TextureDict[texture]))
 
-            # place only on grass and not on another house
-            if currImage == "pyimage1" and House.CheckOverlap(x,y):
-                House.HouseList.append(House(x,y,Textures.TextureDict["house"]))
-
-    def CheckOverlap(x,y):
-        """return true if none of current houses use the spot"""
-        for h in House.HouseList:
+    def CheckOverlap(self,x,y):
+        """return true if none of current objects use the spot"""
+        for h in self.List:
             if h.x == x and h.y == y:
                 return False
         
         return True
 
-    def PlaceHouses(gui):
-        """places created houses on tkinter canvas,
-           requires gui because it uses its function"""
-        for h in House.HouseList:
-            h.ID = gui.CreateImageRectangle(h.texture,h.x,h.y,NW,True)
+    def PlaceAllObjects(self,gui):
+        """places ALL created objects on tkinter canvas,
+           uses PlaceObject method"""
+        for i in range(len(self.List)):
+            self.PlaceObject(gui,i)
 
 class Info:
     name = ""
     difficulty = ""
     itemList = []
 
-    def MenuMapTrans(diffvar, catname, items,gui,dMaps):
+    def MenuMapTrans(diffvar, catname, items,gui,dMaps,dObjects):
 
         list = []
         for i in items:
@@ -285,9 +259,9 @@ class Info:
         Info.difficulty = diffvar.get()
         Info.itemList = list
     
-        dMaps["outside"].Execute(gui,dMaps)
+        dMaps["outside"].Execute(gui,dMaps,dObjects)
 
-def mainmenu(gui,dMaps):
+def mainmenu(gui,dMaps,dObjects):
     #title
     title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = 'bold' )
     title.pack()
@@ -313,13 +287,13 @@ def mainmenu(gui,dMaps):
     lookfor.pack()
 
     var = []
-    var.append(gui.CreatCheckBox(framebig,"Cat Food"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Toy"))
-    var.append(gui.CreatCheckBox(framebig,"Cat mouse"))
-    var.append(gui.CreatCheckBox(framebig,"Cat Bell"))
-    var.append(gui.CreatCheckBox(framebig,"Cat tail"))
-    var.append(gui.CreatCheckBox(framebig,"Cat book"))
-    var.append(gui.CreatCheckBox(framebig,"Cat shoes"))
+    var.append(gui.CreatCheckBox(framebig,"Food"))
+    var.append(gui.CreatCheckBox(framebig,"Toy"))
+    var.append(gui.CreatCheckBox(framebig,"Mouse"))
+    var.append(gui.CreatCheckBox(framebig,"Bells"))
+    var.append(gui.CreatCheckBox(framebig,"Catnip"))
+    var.append(gui.CreatCheckBox(framebig,"Milk"))
+    var.append(gui.CreatCheckBox(framebig,"Mittens"))
     
     #select difficutly
     diffvar = IntVar()
@@ -340,7 +314,7 @@ def mainmenu(gui,dMaps):
     gui.CreateEmptySpace(gui.frame)
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = 'bold',fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps,dObjects)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)
@@ -353,15 +327,18 @@ def main():
     Textures.ReadTexture()
 
     dMaps = {}
+
+    dObjects = {}
     
-    ## add other maps here
+    # add other maps here
     dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
     dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
-    # ---------
+
+    dObjects["boxes"] = BaseRandomObject()
+    dObjects["houses"] = BaseRandomObject()
 
     # Main Stuff
-    mainmenu(gui,dMaps)
-    # ----------
+    mainmenu(gui,dMaps, dObjects)
     
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
