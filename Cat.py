@@ -17,8 +17,8 @@ class Cat:
     def __init__(self, gui, name, catBody,x,y):
         self.name = name
         self.catID = gui.CreateImageRectangle(catBody,x,y,returnOn = True)
-        self.x = x # cat coords
-        self.y = y
+        #self.x = x # cat coords
+        #self.y = y
         self.movementBind(gui)
 
         ## Inventory list for items to be stored.
