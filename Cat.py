@@ -1,101 +1,82 @@
-## A class for the cat.
-
-from tkinter import *
-import time
-
-#canvas = Canvas(width = 500, height = 500, bg = 'white')
-#canvas.pack()
-
+from TextureHandler import Textures
 
 class Cat:
     """ Class for the cat; i.e. the main character of the game..."""
 
-    ## variable to record number of deaths.
     deaths = 0
-        
-    ## stuff to include: name, body...
+          
     def __init__(self, gui, name, catBody,x,y):
         self.name = name
         self.catID = gui.CreateImageRectangle(catBody,x,y,returnOn = True)
-        #self.x = x # cat coords
-        #self.y = y
         self.movementBind(gui)
 
-        ## Inventory list for items to be stored.
         self.inventory = []
 
-    def body(self):
-        # dafug is this ? does it have some intended stuff?
-        print("Body created")
-
     def death(self):
-        ## Need dog code for this.
-        print("You died")
-        Cat.deaths = Cat.deaths + 1
-
-    def itemPickUp(self, i):
-        ## When an item is picked up it is stored in the inventory list.
-        self.inventory.append(i)
-        print(i + " added to inventory.")
-
-    def itemDrop(self, d):
-        ## Items can be dropped from the list, this would be due to contact
-        ## with the dog.
-        self.inventory.remove(d)
-        print(d + " dropped from inventory.")
-
-    def LeftKey(self,ID,gui,nX,nY):
-        try:
-            if gui.canvas.coords(ID)[0] > 0:
-                gui.MoveObject(ID, nX, nY)
-        except:
-            pass
-
-    def RightKey(self,ID,gui,nX,nY, canvasWidth):
-        try:
-            if gui.canvas.coords(ID)[0] < canvasWidth-50:
-                gui.MoveObject(ID, nX, nY)
-        except:
-            pass
+        Cat.deaths += 1
+        print(self.name + " #" + str(Cat.deaths) +" died")
         
-    def DownKey(self,ID,gui,nX,nY, canvasHeight):
-        try:
-            if gui.canvas.coords(ID)[1] < canvasHeight-50:
-                gui.MoveObject(ID, nX, nY)
-        except:
-            pass
+        # add game over? add item drop?       
 
-    def UpKey(self,ID,gui,nX,nY):
-        try:
-            if gui.canvas.coords(ID)[1] > 0:
-                gui.MoveObject(ID, nX, nY)
-        except:
-            pass
-        
+    def itemPickUp(self, Item):
+        # Item should be a class Item
+        # Takes item
+        self.inventory.append(Item)
+        print(Item.item + ", quality: " + str(Item.quality) + " added to inventory.")
+
+    def itemDrop(self, Item):
+        # Item should be a class Item
+        # Drops item
+        self.inventory.remove(Item)
+        print(Item.item + ", quality: " + str(Item.quality) + " dropped from inventory.")
+
     def movementBind(self,gui):
-        ##Link between keyboard keys and functions for movement.
-        gui.root.bind("<Left>", lambda event: self.LeftKey(self.catID,gui,-50,0))
-        gui.root.bind("<Right>", lambda event: self.RightKey(self.catID,gui,50,0,500))
-        gui.root.bind("<Up>", lambda event: self.UpKey(self.catID,gui,0,-50))
-        gui.root.bind("<Down>", lambda event: self.DownKey(self.catID,gui,0,50,500))
-"""
-## Velocity.
-vx = 5.0
-vy = 5.0
-    
-catBody = PhotoImage(file = "Textures/cat.png")
+        # Link between keyboard keys and functions for movement.
+        gui.root.bind("<Left>", lambda event: self.LeftKey(gui,-50,0))
+        gui.root.bind("<Right>", lambda event: self.RightKey(gui,50,0,500))
+        gui.root.bind("<Up>", lambda event: self.UpKey(gui,0,-50))
+        gui.root.bind("<Down>", lambda event: self.DownKey(gui,0,50,500))
 
-#test.
-cat = Cat("Cat", catBody)
-cat.body()
-cat.itemPickUp("food")
-cat.itemPickUp("yarn")
-cat.itemPickUp("milk")
-cat.itemDrop("yarn")
-cat.death()
+    def CheckAhead(self,gui,x,y):
+        """Prevents from walking on fences and trees"""
+        cX,cY = gui.canvas.coords(self.catID)
 
-print(str(len(cat.inventory)) + " items in the inventory.")
-print("Deaths: " + str(Cat.deaths))
+        cX += x
+        cY += y
 
-mainloop()
-"""
+        ground = gui.canvas.itemcget(gui.canvas.find_overlapping(cX,cY,cX+50,cY+50)[0],"image")
+
+        if not ground == Textures.TextStr("tree") and \
+           not ground == Textures.TextStr("fenceH") and \
+           not ground == Textures.TextStr("fenceV"):
+            return True
+        else:
+            return False
+
+    def LeftKey(self,gui,nX,nY):
+        try:
+            if gui.canvas.coords(self.catID)[0] > 0 and self.CheckAhead(gui,nX,nY):
+                gui.MoveObject(self.catID, nX, nY)
+        except:
+            pass
+
+    def RightKey(self,gui,nX,nY, canvasWidth):
+        try:
+            if gui.canvas.coords(self.catID)[0] < canvasWidth-50 and self.CheckAhead(gui,nX,nY):
+                gui.MoveObject(self.catID, nX, nY)
+        except:
+            pass
+        
+    def DownKey(self,gui,nX,nY, canvasHeight):
+        try:
+            if gui.canvas.coords(self.catID)[1] < canvasHeight-50 and self.CheckAhead(gui,nX,nY):
+                gui.MoveObject(self.catID, nX, nY)
+        except:
+            pass
+
+    def UpKey(self,gui,nX,nY):
+        try:
+            if gui.canvas.coords(self.catID)[1] > 0 and self.CheckAhead(gui,nX,nY):
+                gui.MoveObject(self.catID, nX, nY)
+        except:
+            pass

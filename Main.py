@@ -1,6 +1,9 @@
 ﻿import sys
 from tkinter import *
 from random import * # for random placement of houses 
+
+# Import from our files
+from TextureHandler import Textures
 from Dog import Dog
 from Cat import Cat
 
@@ -54,35 +57,6 @@ class GUI:
         self.frame.destroy()
         self.frame = Frame(self.root)
         self.frame.pack()
-
-class Textures():
-    TextureDict = {} # DICTIONARY POWAAHHH!
-
-    def ReadTexture():
-        """ Loads textures that are used in game
-            USE ONCE ONLY """
-
-        Textures.TextureDict["grass"] = PhotoImage(file = "Textures/grass.png")
-        Textures.TextureDict["box"] = PhotoImage(file = "Textures/box.png")
-        Textures.TextureDict["path"] = PhotoImage(file = "Textures/path.png")
-        Textures.TextureDict["fenceH"] = PhotoImage(file = "Textures/fenceH.png")
-        Textures.TextureDict["fenceV"] = PhotoImage(file = "Textures/fenceV.png")
-        Textures.TextureDict["tree"] = PhotoImage(file = "Textures/tree.png")
-        Textures.TextureDict["house"] = PhotoImage(file = "Textures/house.png")
-        Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
-        Textures.TextureDict["dog"] = PhotoImage(file = "Textures/dog.png")
-        Textures.TextureDict["bush"] = PhotoImage(file = "Textures/bush.png")
-        Textures.TextureDict["floor"] = PhotoImage(file = "Textures/floorboards.png")
-        Textures.TextureDict["books"] = PhotoImage(file = "Textures/bookshelf.png")
-        Textures.TextureDict["table"] = PhotoImage(file = "Textures/table.png")
-        Textures.TextureDict["bed"] = PhotoImage(file = "Textures/bed.png")
-        Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")  
-
-    def GetTextureKeys():
-        return Textures.TextureDict.keys()
-
-    def TextStr(textureName):
-        return str(Textures.TextureDict[textureName])
 
 class Map():
     def __init__(self,filePath):
@@ -181,22 +155,22 @@ class mInterior(Map): # adapt for multiple instances
         gui.CreateCanvas()
 
         self.DisplayMap(gui)
-
         
         dObjects["boxes"].CreateObjects(gui.canvas,5,"box","floor")
+        dObjects["boxes"].PlaceItem()
         dObjects["boxes"].PlaceAllObjects(gui)
 
         cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
+        cat.itemPickUp(Item("asd",5))
 
         gui.root.bind("<Return>",lambda event: self.preChange(cat.catID,gui,dMaps,dObjects)) # changes to ouside map, <Return> is "enter" key
 
-        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat.catID)
+        dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat)
         dog.movement(gui)
 
     def preChange(self,cat,gui,dMaps,dObjects):
         """changes into outside when on sofa only :D"""
         x,y = gui.canvas.coords(cat)
-        #if gui.canvas.itemcget(gui.canvas.find_overlapping(x,y,x+50,y+50)[0],"image") == str(Textures.TextureDict["sofa"]):
         if x == self.ExitX and y == self.ExitY:
             dMaps["outside"].Execute(gui,dMaps,dObjects)
 
@@ -244,24 +218,63 @@ class BaseRandomObject:
         for i in range(len(self.List)):
             self.PlaceObject(gui,i)
 
+class Item:
+    def __init__(self,item,quality):
+        """Enter item name, and quality int(1 being low quality, 5 being high quality) """
+        self.item = item
+        self.quality = quality
+
+class Box(BaseRandomObject):
+    def __init__(self):
+       super().__init__()
+
+       self.items = []
+
+    def PlaceItem(self):
+        # places item into the box randomly 
+        while len(self.items) != len(self.List):
+            rInt = randint(0,len(Info.availableItems)-1)
+            rInt2 = randint(1,5)
+
+            if Info.selectedItems[rInt]:
+                self.items.append(Item(Info.availableItems[rInt],rInt2))
+                print("placed: " + Info.availableItems[rInt] + " into the box")
+
+    def GiveItem():
+        # gives item to cat
+        pass
+
 class Info:
     name = ""
     difficulty = ""
-    itemList = []
+    availableItems = ["Food","Toys","Mouse","Bells","Catnip","Milk","Trophy"]
+    selectedItems = []
 
-    def MenuMapTrans(diffvar, catname, items,gui,dMaps,dObjects):
-
-        list = []
+    def Transition(diffvar, catname, items,gui):
         for i in items:
-            list.append(i.get())
+            if i.get() == 1:
+                Info.selectedItems.append(True)
+            else:
+                Info.selectedItems.append(False)
 
         Info.name = catname.get()
         Info.difficulty = diffvar.get()
-        Info.itemList = list
+
+        # Setup for rest of the program
+        Textures.ReadTexture()
+
+        dMaps = {}
+    
+        dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
+        dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
+
+        dObjects = {}
+        dObjects["boxes"] = Box()
+        dObjects["houses"] = BaseRandomObject()
     
         dMaps["outside"].Execute(gui,dMaps,dObjects)
 
-def mainmenu(gui,dMaps,dObjects):
+def mainmenu(gui):
     #title
     title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = 'bold' )
     title.pack()
@@ -286,14 +299,10 @@ def mainmenu(gui,dMaps,dObjects):
     lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue")
     lookfor.pack()
 
+    # adds a chechbox for every item in availableItems
     var = []
-    var.append(gui.CreatCheckBox(framebig,"Food"))
-    var.append(gui.CreatCheckBox(framebig,"Toy"))
-    var.append(gui.CreatCheckBox(framebig,"Mouse"))
-    var.append(gui.CreatCheckBox(framebig,"Bells"))
-    var.append(gui.CreatCheckBox(framebig,"Catnip"))
-    var.append(gui.CreatCheckBox(framebig,"Milk"))
-    var.append(gui.CreatCheckBox(framebig,"Mittens"))
+    for item in Info.availableItems:
+        var.append(gui.CreatCheckBox(framebig,item))
     
     #select difficutly
     diffvar = IntVar()
@@ -314,31 +323,18 @@ def mainmenu(gui,dMaps,dObjects):
     gui.CreateEmptySpace(gui.frame)
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.MenuMapTrans(diffvar,catname,var,gui,dMaps,dObjects)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,gui)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)
     
 def main():   
-    # Setup
+    # Setup tkinter
     root = Tk()
     gui = GUI(root)
 
-    Textures.ReadTexture()
-
-    dMaps = {}
-
-    dObjects = {}
-    
-    # add other maps here
-    dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
-    dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
-
-    dObjects["boxes"] = BaseRandomObject()
-    dObjects["houses"] = BaseRandomObject()
-
-    # Main Stuff
-    mainmenu(gui,dMaps, dObjects)
+    # To main menu and beyond
+    mainmenu(gui)
     
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
