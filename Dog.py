@@ -7,14 +7,17 @@ class Dog:
     def __init__(self,diff,gui,photo,Cat):
         """Difficulty,gui, photo of dog, cat"""
         self.diff = diff
-        
         self.DogID = gui.CreateImageRectangle(photo,50,50,returnOn = True)
 
         self.x,self.y = gui.canvas.coords(self.DogID)
 
         # CAT / needs to be removed
         self.cat = Cat
-        self.cat_x,self.cat_y = gui.canvas.coords(self.cat)
+        self.catID = Cat.catID
+        self.UpdateCatCoords(gui) 
+
+    def UpdateCatCoords(self,gui):
+        self.cat_x,self.cat_y = gui.canvas.coords(self.catID)
 
     def distance(self):
         return sqrt( (self.cat_x-self.x)**2+(self.cat_y-self.y)**2 )
@@ -24,6 +27,7 @@ class Dog:
         return (self.cat_x-self.x)/d, (self.cat_y-self.y)/d # tuple, 2D vector
 
     def move(self, vvx,vvy,gui):
+        # something here causes errors when screen is changed or program is closed
         gui.canvas.move(self.DogID, vvx, vvy )
         self.x += vvx
         self.y += vvy
@@ -31,12 +35,11 @@ class Dog:
     def movement(self,gui):
                 
         if self.diff == 1:
-            # The velocity, or distance moved per time step
-            vx = 10.0 # x velocity
-            vy = 5.0 # y velocity
+            vx = 5 # x velocity
+            vy = 5 # y velocity
             # Boundaries
-            x_min = 0.0
-            y_min = 0.0
+            x_min = 0
+            y_min = 0
             x_max = 450
             y_max = 450
             
@@ -44,78 +47,68 @@ class Dog:
             
             # Move robot for 500 timesteps
             while True:
+                self.UpdateCatCoords(gui)
                 if x == self.cat_x and y == self.cat_y:
+                    self.cat.death()
                     break
-                    print("close")
                 else :
-                    #print(self.distance)
                     x,y = gui.canvas.coords(self.DogID)
-                    #print(x,y)
-                    #print(self.cat_x,self.cat_y)
                     
                     if x >= x_max:
-                        vx = -10.0
-                        
+                        vx = -5
                     if y <= y_min:
-                        vy = 5.0
+                        vy = 5
                     if y >= y_max:
-                        vy = -5.0
+                        vy = -5
                     if x <= x_min:
-                        vx = 10.0
-                    # Move robot
-                    gui.canvas.coords(self.DogID,x+vx,y+vy)
+                        vx = 5
+                    # Move dog
+                    gui.canvas.move(self.DogID,vx,vy)
                     gui.canvas.update()  
                 
                 # Pause for 0.1 seconds, then delete the image
                 time.sleep(0.1)
 
-        if self.diff == 3:
-           
-            while True:
-                if self.distance()>10:
-                    vvx,vvy = self.direction()
-                    #print( ":", self.x, self.y," -> ", self.x+vvx, self.y+vvy)
-                    #print(self.x,self.y,self.distance())
-                    #canvas.move(self.DogID, vvx, vvy )
-                    self.move(vvx,vvy,gui)
-                    #canvas.coords(self.DogID, self.x+vvx, self.y+vvy )
-                    #print(self.x,self.y,self.distance())
-                    #canvas.update()
-                else:
-                    print("close")
-                    break
-
-                gui.canvas.update()
-               
-                time.sleep(0.1)
-
         if self.diff == 2:
-            x,y=gui.canvas.coords(self.DogID)
-
             while True:
+                self.UpdateCatCoords(gui)
                 x,y= gui.canvas.coords(self.DogID)
+
                 if y == self.cat_y and x ==self.cat_x:
-                    print("close")
-                    
+                    self.cat.death()
                     break 
             
                 elif y != self.cat_y:
-                    
                     if y < self.cat_y:
-                        vy = 5.0
+                        vy = 5
                     elif y > self.cat_y:
-                        vy = -5.0
+                        vy = -5
 
-                    gui.canvas.coords(self.DogID,x + 0,y + vy )
+                    gui.canvas.move(self.DogID,0,vy)
                     gui.canvas.update()
 
                 elif y == self.cat_y :
                     if x >= self.cat_x:
-                        vx = -10.0
+                        vx = -5
                     elif x <= self.cat_x:
-                        vx = 5.0
+                        vx = 5
 
-                    gui.canvas.coords(self.DogID,x + vx, y + 0)
+                    gui.canvas.move(self.DogID,vx,0)
                     gui.canvas.update()
                 
-                time.sleep(0.03)            
+                time.sleep(0.05)            
+
+        if self.diff == 3:
+           
+            while True:
+                self.UpdateCatCoords(gui)
+                if self.distance() > 20:
+                    vvx,vvy = self.direction()
+                    self.move(vvx,vvy,gui)
+                else:
+                    self.cat.death()
+                    break
+
+                gui.canvas.update()
+               
+                time.sleep(0.05)
