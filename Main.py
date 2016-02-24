@@ -123,56 +123,58 @@ class Map():
     def preChange():
         print("BASE CLASS, shit went wrong OR u suck, @change")
 
-class mExterior(Map): # make into class like inside 
+class mExterior(Map):
     def __init__(self, filePath):
         super().__init__(filePath)
 
-    def Execute(self,gui,dMaps,dObjects):  
+    def Execute(self,gui,dMaps,house):  
         gui.ClearFrame()
         gui.CreateCanvas()
         
         self.DisplayMap(gui)
         
-        dObjects["houses"].CreateObjects(gui.canvas,5,"house","grass")
-        dObjects["houses"].PlaceAllObjects(gui)
+        house.CreateObjects(gui.canvas,5,"house","grass")
+        house.PlaceAllObjects(gui)
 
         cat = Cat(gui,Info.name,Textures.TextureDict["cat"],100,100)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,dObjects["houses"],dObjects)) # changes to inside map, <Return> is "enter" key
+        gui.root.bind("<Return>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house)) # changes to inside map, <Return> is "enter" key
 
-    def preChange(self,coords,gui,dMaps,House,dObjects): # move into one of the classes
+    def preChange(self,coords,gui,dMaps,house): # move into one of the classes
         """Takes x,y coords in list,
            Checks if cat is standing on house and if yes proceeds to inside"""
-        if not House.CheckOverlap(coords[0],coords[1]):
-            dMaps["inside"].Execute(gui,dMaps,dObjects)
+        if not house.CheckOverlap(coords[0],coords[1]):
+            dMaps["inside"].Execute(gui,dMaps,house)
 
-class mInterior(Map): # adapt for multiple instances
+class mInterior(Map):
     def __init__(self, filePath):
         super().__init__(filePath)
 
-    def Execute(self,gui,dMaps,dObjects):
+    def Execute(self,gui,dMaps,house):
         gui.ClearFrame()
         gui.CreateCanvas()
 
         self.DisplayMap(gui)
-        
-        dObjects["boxes"].CreateObjects(gui.canvas,5,"box","floor")
-        dObjects["boxes"].PlaceItem()
-        dObjects["boxes"].PlaceAllObjects(gui)
 
-        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
-        cat.itemPickUp(Item("asd",5))
+        if not house.box.created:
+            house.box.CreateObjects(gui.canvas,2,"box","floor")
+            house.box.PlaceItem()
+            house.box.created = True
+        house.box.PlaceAllObjects(gui)
 
-        gui.root.bind("<Return>",lambda event: self.preChange(cat.catID,gui,dMaps,dObjects)) # changes to ouside map, <Return> is "enter" key
-
+        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY,house.box)
         dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat)
+
+        gui.root.bind("<Return>",lambda event: self.preChange(cat.catID,gui,dMaps,house,dog)) # changes to ouside map, <Return> is "enter" key
+
         dog.movement(gui)
 
-    def preChange(self,cat,gui,dMaps,dObjects):
+    def preChange(self,cat,gui,dMaps,house,dog):
         """changes into outside when on sofa only :D"""
         x,y = gui.canvas.coords(cat)
         if x == self.ExitX and y == self.ExitY:
-            dMaps["outside"].Execute(gui,dMaps,dObjects)
+            dog.STOP = True # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
+            dMaps["outside"].Execute(gui,dMaps,house)
 
 class Obj:
     def __init__(self,x,y,texture):
@@ -204,13 +206,22 @@ class BaseRandomObject:
             if currImage == Textures.TextStr(chkImage) and self.CheckOverlap(x,y):
                 self.List.append(Obj(x,y,Textures.TextureDict[texture]))
 
-    def CheckOverlap(self,x,y):
-        """return true if none of current objects use the spot"""
+    def CheckOverlap(self,x,y,returnID = False):
+        """return true if none of current objects use the spot
+           if returnID is True return bool and ID where it stopped"""
+        ID = 0
+
         for h in self.List:
             if h.x == x and h.y == y:
-                return False
-        
-        return True
+                if returnID:
+                    return False, ID
+                else:
+                    return False
+            ID += 1
+        if returnID:
+            return True, ID
+        else:
+            return True
 
     def PlaceAllObjects(self,gui):
         """places ALL created objects on tkinter canvas,
@@ -224,11 +235,18 @@ class Item:
         self.item = item
         self.quality = quality
 
+    # few special methods for printing
+    def __repr__(self):
+        return (self.item + ", " + str(self.quality) + " quality.")
+    def __str__(self):
+        return (self.item + "," + str(self.quality) + " quality.")
+
 class Box(BaseRandomObject):
     def __init__(self):
        super().__init__()
 
        self.items = []
+       self.created = False
 
     def PlaceItem(self):
         # places item into the box randomly 
@@ -240,9 +258,25 @@ class Box(BaseRandomObject):
                 self.items.append(Item(Info.availableItems[rInt],rInt2))
                 print("placed: " + Info.availableItems[rInt] + " into the box")
 
-    def GiveItem():
+    def GiveItem(self,ID,gui):
         # gives item to cat
-        pass
+        # Destroys box
+
+        item = self.items[ID]
+
+        self.items.pop(ID)
+        gui.canvas.delete(self.List[ID].ID)
+        self.List.pop(ID)
+
+        print(self.items)
+        
+        return item     
+
+class House(BaseRandomObject):
+    def __init__(self,gui):
+        super().__init__()
+
+        self.box = Box()
 
 class Info:
     name = ""
@@ -268,11 +302,9 @@ class Info:
         dMaps["outside"] = mExterior("Layouts/Outside Layout.txt")
         dMaps["inside"] = mInterior("Layouts/Inside Layout.txt")
 
-        dObjects = {}
-        dObjects["boxes"] = Box()
-        dObjects["houses"] = BaseRandomObject()
+        house = House(gui)
     
-        dMaps["outside"].Execute(gui,dMaps,dObjects)
+        dMaps["outside"].Execute(gui,dMaps,house)
 
 def mainmenu(gui):
     #title
@@ -314,7 +346,7 @@ def mainmenu(gui):
     frame3.pack()
 
     easy = Radiobutton(frame3, text = "Easy", fg = "green", variable = diffvar, value = 1)
-    easy.pack(side = LEFT,)
+    easy.pack(side = LEFT)
     med = Radiobutton(frame3, text = "Medium", fg = "orange", variable = diffvar, value = 2)
     med.pack(side = LEFT)
     hard = Radiobutton(frame3, text = "Hard", fg = "red", variable = diffvar, value = 3)

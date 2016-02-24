@@ -5,10 +5,10 @@ class Cat:
 
     deaths = 0
           
-    def __init__(self, gui, name, catBody,x,y):
+    def __init__(self, gui, name, catBody,x,y,box = None):
         self.name = name
         self.catID = gui.CreateImageRectangle(catBody,x,y,returnOn = True)
-        self.movementBind(gui)
+        self.movementBind(gui,box)
 
         self.inventory = []
 
@@ -30,12 +30,22 @@ class Cat:
         self.inventory.remove(Item)
         print(Item.item + ", quality: " + str(Item.quality) + " dropped from inventory.")
 
-    def movementBind(self,gui):
+    def openBox(self,gui,box):
+        cX, cY = gui.canvas.coords(self.catID)
+
+        boxUnd, ID = box.CheckOverlap(cX,cY,True)
+        boxUnd = not boxUnd
+
+        if boxUnd:
+            self.itemPickUp(box.GiveItem(ID,gui))
+
+    def movementBind(self,gui,box):
         # Link between keyboard keys and functions for movement.
         gui.root.bind("<Left>", lambda event: self.LeftKey(gui,-50,0))
         gui.root.bind("<Right>", lambda event: self.RightKey(gui,50,0,500))
         gui.root.bind("<Up>", lambda event: self.UpKey(gui,0,-50))
         gui.root.bind("<Down>", lambda event: self.DownKey(gui,0,50,500))
+        gui.root.bind("<e>",lambda event:self.openBox(gui,box))
 
     def CheckAhead(self,gui,x,y):
         """Prevents from walking on fences and trees"""
