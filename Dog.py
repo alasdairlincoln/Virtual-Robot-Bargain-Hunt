@@ -14,7 +14,8 @@ class Dog:
         # CAT / needs to be removed
         self.cat = Cat
         self.catID = Cat.catID
-        self.UpdateCatCoords(gui) 
+        self.UpdateCatCoords(gui)
+        self.STOP = False # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
 
     def UpdateCatCoords(self,gui):
         self.cat_x,self.cat_y = gui.canvas.coords(self.catID)
@@ -33,7 +34,6 @@ class Dog:
         self.y += vvy
         
     def movement(self,gui):
-                
         if self.diff == 1:
             vx = 5 # x velocity
             vy = 5 # y velocity
@@ -46,10 +46,11 @@ class Dog:
             x,y = gui.canvas.coords(self.DogID)
             
             # Move robot for 500 timesteps
-            while True:
+            while not self.STOP:  # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                 self.UpdateCatCoords(gui)
                 if x == self.cat_x and y == self.cat_y:
                     self.cat.death()
+                    self.STOP = True # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                     break
                 else :
                     x,y = gui.canvas.coords(self.DogID)
@@ -70,12 +71,13 @@ class Dog:
                 time.sleep(0.1)
 
         if self.diff == 2:
-            while True:
+            while not self.STOP: # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                 self.UpdateCatCoords(gui)
                 x,y= gui.canvas.coords(self.DogID)
 
                 if y == self.cat_y and x ==self.cat_x:
                     self.cat.death()
+                    self.STOP = True # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                     break 
             
                 elif y != self.cat_y:
@@ -100,13 +102,14 @@ class Dog:
 
         if self.diff == 3:
            
-            while True:
+            while not self.STOP: # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                 self.UpdateCatCoords(gui)
                 if self.distance() > 20:
                     vvx,vvy = self.direction()
                     self.move(vvx,vvy,gui)
                 else:
                     self.cat.death()
+                    self.STOP = True # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
                     break
 
                 gui.canvas.update()

@@ -4,13 +4,12 @@ class Cat:
     """ Class for the cat; i.e. the main character of the game..."""
 
     deaths = 0
+    inventory = []
           
-    def __init__(self, gui, name, catBody,x,y):
+    def __init__(self, gui, name, catBody,x,y,box = None):
         self.name = name
         self.catID = gui.CreateImageRectangle(catBody,x,y,returnOn = True)
-        self.movementBind(gui)
-
-        self.inventory = []
+        self.CatKeyBinds(gui,box)
 
     def death(self):
         Cat.deaths += 1
@@ -19,23 +18,38 @@ class Cat:
         # add game over? add item drop?       
 
     def itemPickUp(self, Item):
-        # Item should be a class Item
-        # Takes item
-        self.inventory.append(Item)
-        print(Item.item + ", quality: " + str(Item.quality) + " added to inventory.")
+        # takes item, the item should be class Item
+        Cat.inventory.append(Item)
+        print(str(Item)  + " added to inventory")
 
     def itemDrop(self, Item):
-        # Item should be a class Item
         # Drops item
-        self.inventory.remove(Item)
-        print(Item.item + ", quality: " + str(Item.quality) + " dropped from inventory.")
+        Cat.inventory.remove(Item)
+        print(str(Item) + " dropped from inventory")
 
-    def movementBind(self,gui):
-        # Link between keyboard keys and functions for movement.
+    def openBox(self,gui,box):
+        try:
+            cX, cY = gui.canvas.coords(self.catID)
+
+            boxUnd, ID = box.CheckOverlap(cX,cY,True)
+            if not boxUnd:
+                self.itemPickUp(box.GiveItem(ID,gui))
+        except:
+            pass
+
+    def showInventory(self):
+        print("Your cat has " + str(len(Cat.inventory)) + " items:")
+        for i in Cat.inventory:
+            print(i)
+
+    def CatKeyBinds(self,gui,box):
+        # All key bindings associated with Cat
         gui.root.bind("<Left>", lambda event: self.LeftKey(gui,-50,0))
         gui.root.bind("<Right>", lambda event: self.RightKey(gui,50,0,500))
         gui.root.bind("<Up>", lambda event: self.UpKey(gui,0,-50))
         gui.root.bind("<Down>", lambda event: self.DownKey(gui,0,50,500))
+        gui.root.bind("<x>",lambda event: self.openBox(gui,box))
+        gui.root.bind("<c>",lambda event: self.showInventory())
 
     def CheckAhead(self,gui,x,y):
         """Prevents from walking on fences and trees"""
