@@ -1,4 +1,6 @@
 from TextureHandler import Textures
+from Gui import GUI
+from tkinter import *
 
 class Cat:
     """ Class for the cat; i.e. the main character of the game..."""
@@ -37,10 +39,56 @@ class Cat:
         except:
             pass
 
-    def showInventory(self):
-        print("Your cat has " + str(len(Cat.inventory)) + " items:")
+    def SortItems(self,criteria,gui,gameover):
+        sortList = self.inventory 
+        if criteria == "quality":
+            for i in range(len(sortList)):
+                for j in range(len(sortList)):
+                    if sortList[i].quality > sortList[j].quality:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+        
+        elif criteria == "name":
+            for i in range(len(sortList)):
+                for j in range(len(sortList)):
+                    if sortList[i].item < sortList[j].item:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+
+        gui.ClearFrame()
+        self.showInventory(gui,GameOver = gameover)
+
+    def showInventory(self,gui = None, GameOver = False):
+        """Seperate window for score"""
+        if gui == None:
+            root = Tk()
+            gui = GUI(root,"Inventory")
+
+        if GameOver:
+            label = Label(gui.frame,text = "Game over",fg = "red",font = ("Arial",16,"bold"))
+            label.pack(padx = 100)
+
+        label = Label(gui.frame,text = "Your cat has " + str(len(Cat.inventory)) + " items:")
+        label.pack(padx = 100)
+
         for i in Cat.inventory:
-            print(i)
+            label = Label(gui.frame,text = str(i))
+            label.pack(padx = 100)
+
+        button = Button(gui.frame,text = "Sort by quality",command = lambda: self.SortItems("quality",gui,GameOver))
+        button.pack(side = LEFT)
+        button = Button(gui.frame,text = "Sort by name",command = lambda: self.SortItems("name",gui,GameOver))
+        button.pack(side = RIGHT)
+
+        if GameOver:
+            button = Button(gui.frame,text = "Exit",fg = "red",font = ("Arial",14,"bold"),command = lambda: sys.exit())
+            button.pack()
+
+            gui.root.protocol("WM_DELETE_WINDOW",lambda:sys.exit()) 
+
+        gui.root.mainloop
 
     def CatKeyBinds(self,gui,box):
         # All key bindings associated with Cat
@@ -62,7 +110,8 @@ class Cat:
 
         if not ground == Textures.TextStr("tree") and \
            not ground == Textures.TextStr("fenceH") and \
-           not ground == Textures.TextStr("fenceV"):
+           not ground == Textures.TextStr("fenceV") and \
+           not ground == Textures.TextStr("wall"):
             return True
         else:
             return False

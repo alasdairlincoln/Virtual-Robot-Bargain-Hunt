@@ -20,7 +20,7 @@ class Textures():
         Textures.TextureDict["dog"] = PhotoImage(file = "Textures/dog.png")
         Textures.TextureDict["bush"] = PhotoImage(file = "Textures/bush.png")
         Textures.TextureDict["floor"] = PhotoImage(file = "Textures/floorboards.png")
-        Textures.TextureDict["books"] = PhotoImage(file = "Textures/bookshelf.png")
+        Textures.TextureDict["wall"] = PhotoImage(file = "Textures/wall.png")
         Textures.TextureDict["table"] = PhotoImage(file = "Textures/table.png")
         Textures.TextureDict["bed"] = PhotoImage(file = "Textures/bed.png")
         Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")  

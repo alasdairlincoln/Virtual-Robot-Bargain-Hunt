@@ -23,6 +23,9 @@
   <ItemGroup>
     <Compile Include="Cat.py" />
     <Compile Include="Dog.py" />
+    <Compile Include="Gui.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Main.py" />
     <Compile Include="TextureHandler.py">
       <SubType>Code</SubType>

@@ -7,7 +7,7 @@ class Dog:
     def __init__(self,diff,gui,photo,Cat):
         """Difficulty,gui, photo of dog, cat"""
         self.diff = diff
-        self.DogID = gui.CreateImageRectangle(photo,50,50,returnOn = True)
+        self.DogID = gui.CreateImageRectangle(photo,100,50,returnOn = True)
 
         self.x,self.y = gui.canvas.coords(self.DogID)
 
@@ -38,10 +38,10 @@ class Dog:
             vx = 5 # x velocity
             vy = 5 # y velocity
             # Boundaries
-            x_min = 0
-            y_min = 0
-            x_max = 450
-            y_max = 450
+            x_min = 50
+            y_min = 50
+            x_max = 400
+            y_max = 400
             
             x,y = gui.canvas.coords(self.DogID)
             
