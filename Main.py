@@ -6,57 +6,7 @@ from random import * # for random placement of houses
 from TextureHandler import Textures
 from Dog import Dog
 from Cat import Cat
-
-class GUI:
-
-    def __init__(self,root):
-        self.root = root
-        self.frame = Frame(self.root)
-        self.frame.pack()
-
-        self.root.title("Cat Hunt")
-       
-    def CreateCanvas(self,wWidth = 500, wHeight = 500, Div = 50,background = "white"):
-        self.canvas = Canvas(self.frame,width = wWidth,height = wHeight,bg = background)
-        self.canvas.pack()
-        self.Div = Div
-
-    def CreateRectangle(self,x,y,Fill = "white",Outline = "black", returnOn = False):
-        # Wrapper for create rectangle function
-        rect = self.canvas.create_rectangle(x, y, x + self.Div,y + self.Div, fill = Fill,outline = Outline)
-        self.canvas.pack()
-        
-        # Returns object ID
-        if returnOn == True:
-            return rect
-
-    def CreateImageRectangle(self,photo,x,y,anch = NW,returnOn = False):
-        """ Needs a loaded Photo .... """    
-        imRect = self.canvas.create_image(x,y,image = photo,anchor = anch)
-        self.canvas.pack()
-        
-        # Returns object ID
-        if returnOn == True:
-            return imRect
-
-    def CreatCheckBox(self,frame,Text):
-        check = IntVar()
-        checkbox = Checkbutton(frame, text= Text, variable = check)
-        checkbox.pack()
-        
-        return check
-
-    def CreateEmptySpace(self, frame,x = 1, y = 5):
-        space = Frame(frame)
-        space.pack(padx = x, pady = y)
-
-    def MoveObject(self,ID,X,Y):
-        self.canvas.move(ID,X,Y)
-
-    def ClearFrame(self):
-        self.frame.destroy()
-        self.frame = Frame(self.root)
-        self.frame.pack()
+from Gui import GUI
 
 class Map():
     def __init__(self,filePath):
@@ -101,7 +51,7 @@ class Map():
                 elif self.mapList[i][j] == "7":
                     gui.CreateImageRectangle(Textures.TextureDict["floor"],x,y)
                 elif self.mapList[i][j] == "8":
-                    gui.CreateImageRectangle(Textures.TextureDict["books"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["wall"],x,y)
                 elif self.mapList[i][j] == "9":
                     gui.CreateImageRectangle(Textures.TextureDict["table"],x,y)
                 elif self.mapList[i][j] == "10":
@@ -137,16 +87,22 @@ class mExterior(Map):
 
         cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
 
-        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house)) # changes to inside map, <Return> is "enter" key
+        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key
 
-    def preChange(self,coords,gui,dMaps,house): # move into one of the classes
+    def preChange(self,coords,gui,dMaps,house,cat): # move into one of the classes
         """Takes x,y coords in list,
            Checks if cat is standing on house and if yes proceeds to inside"""
+
+        ground = gui.canvas.itemcget(gui.canvas.find_overlapping(coords[0],coords[1],coords[0]+50,coords[1]+50)[0],"image")
+        if ground == Textures.TextStr("bush"):
+            cat.showInventory(GameOver = True)
 
         bool, ID = house.CheckOverlap(coords[0],coords[1],True)
         self.ExitX, self.ExitY = coords
         if not bool:
             dMaps["inside"].Execute(gui,dMaps,house,ID)
+
+        
 
 class mInterior(Map):
     def __init__(self, filePath):
@@ -354,6 +310,7 @@ def mainmenu(gui):
     easy.pack(side = LEFT)
     med = Radiobutton(frame3, text = "Medium", fg = "orange", variable = diffvar, value = 2)
     med.pack(side = LEFT)
+    med.select() # default difficulty
     hard = Radiobutton(frame3, text = "Hard", fg = "red", variable = diffvar, value = 3)
     hard.pack(side = LEFT)
 
@@ -368,11 +325,14 @@ def mainmenu(gui):
 def main():   
     # Setup tkinter
     root = Tk()
-    gui = GUI(root)
+    gui = GUI(root,"Cat Hunt")
 
     # To main menu and beyond
     mainmenu(gui)
     
+    # added to exit the program if the main window is closed. 
+    # to close inventory window or any others if the main one is closed
+    root.protocol("WM_DELETE_WINDOW",lambda:sys.exit()) 
     # Mainloop, MUST ALWAYS BE ON BOTTOM
     root.mainloop()
     
