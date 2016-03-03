@@ -1,6 +1,7 @@
 from TextureHandler import Textures
 from Gui import GUI
 from tkinter import *
+from random import randint
 
 class Cat:
     """ Class for the cat; i.e. the main character of the game..."""
@@ -15,19 +16,18 @@ class Cat:
 
     def death(self):
         Cat.deaths += 1
-        print(self.name + " #" + str(Cat.deaths) +" died")
-        
-        # add game over? add item drop?       
+
+        if not len(Cat.inventory) == 0:
+            rInt = randint(0,len(Cat.inventory)-1)
+            Cat.inventory.pop(rInt)
+            print(self.name + " #" + str(Cat.deaths) +" died\nAnd dropped an item")
+        else:
+            print(self.name + " #" + str(Cat.deaths) +" died")
 
     def itemPickUp(self, Item):
         # takes item, the item should be class Item
         Cat.inventory.append(Item)
         print(str(Item)  + " added to inventory")
-
-    def itemDrop(self, Item):
-        # Drops item
-        Cat.inventory.remove(Item)
-        print(str(Item) + " dropped from inventory")
 
     def openBox(self,gui,box):
         try:
@@ -41,7 +41,7 @@ class Cat:
 
     def SortItems(self,criteria,gui,gameover):
         sortList = self.inventory 
-        if criteria == "quality":
+        if criteria == "qualityD":
             for i in range(len(sortList)):
                 for j in range(len(sortList)):
                     if sortList[i].quality > sortList[j].quality:
@@ -49,10 +49,26 @@ class Cat:
                         sortList[i] = sortList[j]
                         sortList[j] = tmp
         
-        elif criteria == "name":
+        if criteria == "qualityA":
+            for i in range(len(sortList)):
+                for j in range(len(sortList)):
+                    if sortList[i].quality < sortList[j].quality:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+
+        elif criteria == "nameD":
             for i in range(len(sortList)):
                 for j in range(len(sortList)):
                     if sortList[i].item < sortList[j].item:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+
+        elif criteria == "nameA":
+            for i in range(len(sortList)):
+                for j in range(len(sortList)):
+                    if sortList[i].item > sortList[j].item:
                         tmp = sortList[i]
                         sortList[i] = sortList[j]
                         sortList[j] = tmp
@@ -77,10 +93,19 @@ class Cat:
             label = Label(gui.frame,text = str(i))
             label.pack(padx = 100)
 
-        button = Button(gui.frame,text = "Sort by quality",command = lambda: self.SortItems("quality",gui,GameOver))
-        button.pack(side = LEFT)
-        button = Button(gui.frame,text = "Sort by name",command = lambda: self.SortItems("name",gui,GameOver))
-        button.pack(side = RIGHT)
+        frame = Frame(gui.frame)
+        frame.pack()
+
+        b1 = Button(frame,text = "Name A-Z",command = lambda: self.SortItems("nameD",gui,GameOver))
+        b1.pack(side = RIGHT)
+        b2 = Button(frame,text = "Name Z-A",command = lambda: self.SortItems("nameA",gui,GameOver))
+        b2.pack(side = RIGHT)
+
+        b3 = Button(frame,text = "Quality descending",command = lambda: self.SortItems("qualityD",gui,GameOver))
+        b3.pack(side = LEFT)
+        b4 = Button(frame,text = "Quality ascending",command = lambda: self.SortItems("qualityA",gui,GameOver))
+        b4.pack(side = LEFT)
+        
 
         if GameOver:
             button = Button(gui.frame,text = "Exit",fg = "red",font = ("Arial",14,"bold"),command = lambda: sys.exit())

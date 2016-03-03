@@ -1,6 +1,6 @@
 ﻿import sys
 from tkinter import *
-from random import * # for random placement of houses 
+from random import * # for random placement of houses
 
 # Import from our files
 from TextureHandler import Textures
@@ -57,7 +57,7 @@ class Map():
                 elif self.mapList[i][j] == "10":
                     gui.CreateImageRectangle(Textures.TextureDict["bed"],x,y)
                 elif self.mapList[i][j] == "11":
-                    gui.CreateImageRectangle(Textures.TextureDict["sofa"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["door"],x,y)
                     # used to determine where the exit is in a house
                     self.ExitX = x 
                     self.ExitY = y
@@ -105,10 +105,9 @@ class mExterior(Map):
         gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key
 
         # Auto stuff
-        
-        foundHouses = self.Search(gui,"house")
-        print(foundHouses)
-        # from here the cat should go to the location and generate a button press to enter
+        if Info.autoCat: # Continue
+            foundHouses = self.Search(gui,"house") # filter out previously visited houses
+            print(foundHouses)                    
 
     def preChange(self,coords,gui,dMaps,house,cat): # move into one of the classes
         """Takes x,y coords in list,
@@ -122,7 +121,6 @@ class mExterior(Map):
         bool, ID = house.CheckOverlap(coords[0],coords[1],True)
         self.ExitX, self.ExitY = coords
         if not bool:
-            house.VisitedHouses[ID] = True
             #print(ID, str(house.VisitedHouses[ID]))
             dMaps["inside"].Execute(gui,dMaps,house,ID)
 
@@ -159,7 +157,7 @@ class Obj:
         self.texture = texture
         self.ID = None
         # used for puting in boxes inside houses and putting items inside boxes :)
-        self.item = None 
+        self.item = None
 
 class BaseRandomObject:
     """Random object Base class"""
@@ -253,7 +251,6 @@ class House(BaseRandomObject):
         super().__init__()
 
         self.boxCreated = False
-        self.VisitedHouses = [False,False,False,False,False]
 
     def FillHouse(self,gui,amount,ID):
         if self.List[ID].item == None:
@@ -265,10 +262,11 @@ class House(BaseRandomObject):
 class Info:
     name = ""
     difficulty = ""
+    autoCat = False
     availableItems = ["Food","Toys","Mouse","Bells","Catnip","Milk","Trophy"]
     selectedItems = []
 
-    def Transition(diffvar, catname, items,gui):
+    def Transition(diffvar, catname, items,autoCat,gui):
         for i in items:
             if i.get() == 1:
                 Info.selectedItems.append(True)
@@ -277,6 +275,9 @@ class Info:
 
         Info.name = catname.get()
         Info.difficulty = diffvar.get()
+
+        if autoCat.get() == 1:
+            Info.autoCat = True
 
         # Setup for rest of the program
         Textures.ReadTexture()
@@ -309,7 +310,7 @@ def mainmenu(gui):
 
     #Different types of items
 
-    framebig =Frame(gui.frame)
+    framebig = Frame(gui.frame)
     framebig.pack()
       
     lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue")
@@ -337,10 +338,12 @@ def mainmenu(gui):
     hard = Radiobutton(frame3, text = "Hard", fg = "red", variable = diffvar, value = 3)
     hard.pack(side = LEFT)
 
+    autoCat = gui.CreatCheckBox(gui.frame,"Auto cat movement?")
+
     gui.CreateEmptySpace(gui.frame)
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,gui)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,autoCat,gui)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)

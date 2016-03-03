@@ -23,7 +23,7 @@ class Textures():
         Textures.TextureDict["wall"] = PhotoImage(file = "Textures/wall.png")
         Textures.TextureDict["table"] = PhotoImage(file = "Textures/table.png")
         Textures.TextureDict["bed"] = PhotoImage(file = "Textures/bed.png")
-        Textures.TextureDict["sofa"] = PhotoImage(file = "Textures/sofa.png")  
+        Textures.TextureDict["door"] = PhotoImage(file = "Textures/door.png")  
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
