@@ -21,11 +21,23 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Cat.py" />
+    <Compile Include="Dog.py" />
+    <Compile Include="Gui.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Main.py" />
+    <Compile Include="TextureHandler.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Map.txt" />
+    <Content Include="Layouts\Inside Layout.txt" />
+    <Content Include="Layouts\Outside Layout.txt" />
     <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Layouts\" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
