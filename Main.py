@@ -64,7 +64,22 @@ class Map():
                 elif self.mapList[i][j] == "12":
                     gui.CreateImageRectangle(Textures.TextureDict["box"],x,y)    
                 else:
-                    raise ValueError("Unidentified symbol was found in MapList")       
+                    raise ValueError("Unidentified symbol was found in MapList")   
+                
+    def Search(self,gui,strTarget):
+        canvasItems = gui.canvas.find_all()
+
+        foundList = []
+
+        # Linear search through list of items on canvas
+        # we cannot use binary search since its not a number and there is no good criteria to sort by
+        # since we are searching for an object with specific picture
+        for i in canvasItems:
+            if gui.canvas.itemcget(i,"image") == Textures.TextStr(strTarget):
+                foundList.append(gui.canvas.coords(i))
+                #print("Found " + str(i) + " " + str(foundList[len(foundList)-1]))   
+
+        return foundList
 
     def Execute():
         print("BASE CLASS, shit went wrong OR u suck, @execute")
@@ -89,9 +104,16 @@ class mExterior(Map):
 
         gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key
 
+        # Auto stuff
+        
+        foundHouses = self.Search(gui,"house")
+        print(foundHouses)
+        # from here the cat should go to the location and generate a button press to enter
+
     def preChange(self,coords,gui,dMaps,house,cat): # move into one of the classes
         """Takes x,y coords in list,
-           Checks if cat is standing on house and if yes proceeds to inside"""
+           Checks if cat is standing on house and if yes proceeds to inside,
+           or if the cat is on grass, ends the game"""
 
         ground = gui.canvas.itemcget(gui.canvas.find_overlapping(coords[0],coords[1],coords[0]+50,coords[1]+50)[0],"image")
         if ground == Textures.TextStr("bush"):
@@ -100,9 +122,9 @@ class mExterior(Map):
         bool, ID = house.CheckOverlap(coords[0],coords[1],True)
         self.ExitX, self.ExitY = coords
         if not bool:
+            house.VisitedHouses[ID] = True
+            #print(ID, str(house.VisitedHouses[ID]))
             dMaps["inside"].Execute(gui,dMaps,house,ID)
-
-        
 
 class mInterior(Map):
     def __init__(self, filePath):
@@ -231,6 +253,7 @@ class House(BaseRandomObject):
         super().__init__()
 
         self.boxCreated = False
+        self.VisitedHouses = [False,False,False,False,False]
 
     def FillHouse(self,gui,amount,ID):
         if self.List[ID].item == None:
