@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 from tkinter import *
 from random import * # for random placement of houses 
 
@@ -315,12 +315,33 @@ def mainmenu(gui):
     hard.pack(side = LEFT)
 
     gui.CreateEmptySpace(gui.frame)
+    
+    #Tutorial Button
+    tutorialbutton = Button(gui.frame, text="TUTORIAL",font = ("Arial",14,"bold"),fg = 'blue', command = lambda: tut_window(gui))
+    tutorialbutton.pack()
 
     #Start Button
     startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,gui)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)
+    
+def tut_window(self):
+    # Function to create tutorial window.
+    root2 = Tk()
+    root2.title("Tutorial")
+
+    # Text to be displayed in window.
+    Tutorial_text = "Welcome to CatGame tutorial. Below is the controls for the game:\n\nTo move the cat simply use the directional arrow keys.\n\nz - enter/exit house. Press this when on the house icon from outside to enter; or on the couch when inside the house to exit.\n\nx - pick up item. Inside the house there will be boxes to collect with items inside. Simply go over the box and press x. The item is then stored in your inventory.\n\nc - view the inventory. If you wish to see what is currently in your inventory simply press c.\n\nAvoid the dogs! If you come in contact with a dog this will result in death. You will also lose the items that were collected."
+
+    # Creates the message withe the text being 'Tutorial_text'.
+    msg = Message(root2, text = Tutorial_text)
+
+    # Configurates the text font and background.
+    msg.config(bg='white',fg='blue' font=('times',16,'bold',))
+
+    # Packs the message into the window root2.
+    msg.pack(side=LEFT)
     
 def main():   
     # Setup tkinter
