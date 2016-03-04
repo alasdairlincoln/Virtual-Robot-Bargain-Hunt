@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 from tkinter import *
 from random import * # for random placement of houses 
 
@@ -338,7 +338,7 @@ def tut_window(self):
     msg = Message(root2, text = Tutorial_text)
 
     # Configurates the text font and background.
-    msg.config(bg='white',fg='blue' font=('times',16,'bold',))
+    msg.config(bg='white',fg='blue', font=('times',16,'bold'))
 
     # Packs the message into the window root2.
     msg.pack(side=LEFT)
