@@ -3,11 +3,12 @@ import time
 from math import sqrt
 
 class Dog:
+    """Dog class, handles everything related to dog"""
     
     def __init__(self,diff,gui,photo,Cat):
         """Difficulty,gui, photo of dog, cat"""
         self.diff = diff
-        self.DogID = gui.CreateImageRectangle(photo,100,50,returnOn = True)
+        self.DogID = gui.CreateImageRectangle(photo,250,50,returnOn = True)
 
         self.x,self.y = gui.canvas.coords(self.DogID)
 

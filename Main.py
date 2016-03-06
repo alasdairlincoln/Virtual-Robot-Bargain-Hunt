@@ -1,6 +1,6 @@
 ﻿import sys
 from tkinter import *
-from random import * # for random placement of houses 
+from random import * # for random placement of houses
 
 # Import from our files
 from TextureHandler import Textures
@@ -9,6 +9,7 @@ from Cat import Cat
 from Gui import GUI
 
 class Map():
+    """Base class for maps"""
     def __init__(self,filePath):
         self.mapList = [] 
         self.ReadSplit(filePath)
@@ -57,15 +58,32 @@ class Map():
                 elif self.mapList[i][j] == "10":
                     gui.CreateImageRectangle(Textures.TextureDict["bed"],x,y)
                 elif self.mapList[i][j] == "11":
-                    gui.CreateImageRectangle(Textures.TextureDict["sofa"],x,y)
+                    gui.CreateImageRectangle(Textures.TextureDict["door"],x,y)
                     # used to determine where the exit is in a house
                     self.ExitX = x 
                     self.ExitY = y
                 elif self.mapList[i][j] == "12":
                     gui.CreateImageRectangle(Textures.TextureDict["box"],x,y)    
                 else:
-                    raise ValueError("Unidentified symbol was found in MapList")       
+                    raise ValueError("Unidentified symbol was found in MapList")   
+                
+    def Search(self,gui,strTarget):
+        """Search Imlementation for houses, but no navigation to houses :(
+           strTarget - string for targeted texture"""
+        canvasItems = gui.canvas.find_all()
 
+        foundList = []
+
+        # Linear search through list of items on canvas
+        # we cannot use binary search since its not a number and there is no good criteria to sort by
+        # since we are searching for an object with specific picture
+        for i in canvasItems:
+            if gui.canvas.itemcget(i,"image") == Textures.TextStr(strTarget):
+                foundList.append(gui.canvas.coords(i))
+
+        return foundList
+
+    # Should be changed in child class or not used
     def Execute():
         print("BASE CLASS, shit went wrong OR u suck, @execute")
 
@@ -73,10 +91,14 @@ class Map():
         print("BASE CLASS, shit went wrong OR u suck, @change")
 
 class mExterior(Map):
+    """Exterior map class, 
+       Inherits from map"""
+
     def __init__(self, filePath):
         super().__init__(filePath)
 
     def Execute(self,gui,dMaps,house):  
+
         gui.ClearFrame()
         gui.CreateCanvas()
         
@@ -87,11 +109,12 @@ class mExterior(Map):
 
         cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
 
-        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key
+        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key                 
 
     def preChange(self,coords,gui,dMaps,house,cat): # move into one of the classes
         """Takes x,y coords in list,
-           Checks if cat is standing on house and if yes proceeds to inside"""
+           Checks if cat is standing on house and if yes proceeds to inside,
+           or if the cat is on grass, ends the game"""
 
         ground = gui.canvas.itemcget(gui.canvas.find_overlapping(coords[0],coords[1],coords[0]+50,coords[1]+50)[0],"image")
         if ground == Textures.TextStr("bush"):
@@ -102,13 +125,15 @@ class mExterior(Map):
         if not bool:
             dMaps["inside"].Execute(gui,dMaps,house,ID)
 
-        
-
 class mInterior(Map):
+    """Interior map class, 
+       Inherits from map"""
+
     def __init__(self, filePath):
         super().__init__(filePath)
 
     def Execute(self,gui,dMaps,house,ID):
+
         gui.ClearFrame()
         gui.CreateCanvas()
 
@@ -131,22 +156,25 @@ class mInterior(Map):
             dMaps["outside"].Execute(gui,dMaps,house)
 
 class Obj:
+    # This would be a Struct if it was written in C++
     def __init__(self,x,y,texture):
         self.x = x
         self.y = y
         self.texture = texture
         self.ID = None
         # used for puting in boxes inside houses and putting items inside boxes :)
-        self.item = None 
+        self.item = None
 
 class BaseRandomObject:
     """Random object Base class"""
+
     def __init__(self):
         self.List = []
 
     def PlaceObject(self,gui,i):
         """places created object on tkinter canvas,
            requires gui"""
+
         self.List[i].ID = gui.CreateImageRectangle(self.List[i].texture,self.List[i].x,self.List[i].y,returnOn = True)
 
     def CreateObjects(self,canvas,amount,texture,chkImage):
@@ -164,6 +192,7 @@ class BaseRandomObject:
     def CheckOverlap(self,x,y,returnID = False):
         """return true if none of current objects use the spot
            if returnID is True return bool and ID where it stopped"""
+
         ID = 0
 
         for h in self.List:
@@ -181,10 +210,12 @@ class BaseRandomObject:
     def PlaceAllObjects(self,gui):
         """places ALL created objects on tkinter canvas,
            uses PlaceObject method"""
+
         for i in range(len(self.List)):
             self.PlaceObject(gui,i)
 
 class Item:
+    """Items go inside boxes! and to cat inventory"""
     def __init__(self,item,quality):
         """Enter item name, and quality int(1 being low quality, 5 being high quality) """
         self.item = item
@@ -197,6 +228,7 @@ class Item:
         return ("<" + self.item + ", " + str(self.quality) + " quality>")
 
 class Box(BaseRandomObject):
+    """Boxes Inside houses!"""
     def __init__(self):
        super().__init__()
 
@@ -204,6 +236,7 @@ class Box(BaseRandomObject):
 
     def FillBox(self,ID):
         # places item into the box randomly 
+
         while self.List[ID].item == None:
             rInt = randint(0,len(Info.availableItems)-1)
             rInt2 = randint(1,5)
@@ -212,6 +245,7 @@ class Box(BaseRandomObject):
                 self.List[ID].item = Item(Info.availableItems[rInt],rInt2)
 
     def CreateObjects(self, canvas, amount, texture, chkImage):
+
         super().CreateObjects(canvas, amount, texture, chkImage)
 
         for i in range(len(self.List)):
@@ -219,6 +253,7 @@ class Box(BaseRandomObject):
 
     def GiveItem(self,ID,gui):
         # gives item to cat and destroys box 
+
         item = self.List[ID].item
 
         gui.canvas.delete(self.List[ID].ID)
@@ -227,12 +262,15 @@ class Box(BaseRandomObject):
         return item     
 
 class House(BaseRandomObject):
+    """Houses placeable in Outside map """
+
     def __init__(self):
         super().__init__()
 
         self.boxCreated = False
 
     def FillHouse(self,gui,amount,ID):
+
         if self.List[ID].item == None:
             self.List[ID].item = Box()
             self.List[ID].item.CreateObjects(gui.canvas,amount,"box","floor")
@@ -240,6 +278,8 @@ class House(BaseRandomObject):
         self.List[ID].item.PlaceAllObjects(gui)    
 
 class Info:
+    """Basic info from main menu"""
+
     name = ""
     difficulty = ""
     availableItems = ["Food","Toys","Mouse","Bells","Catnip","Milk","Trophy"]
@@ -268,8 +308,9 @@ class Info:
         dMaps["outside"].Execute(gui,dMaps,house)
 
 def mainmenu(gui):
-    #title
-    title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = 'bold' )
+    """Main menu, allows to choose all the things"""
+    
+    title = Label(gui.frame, text= "CAT HUNT!", fg="blue",font = "bold" )
     title.pack()
 
     gui.CreateEmptySpace(gui.frame)
@@ -286,7 +327,7 @@ def mainmenu(gui):
 
     #Different types of items
 
-    framebig =Frame(gui.frame)
+    framebig = Frame(gui.frame)
     framebig.pack()
       
     lookfor = Label(framebig, text= "What do you wish to look for?", fg="blue")

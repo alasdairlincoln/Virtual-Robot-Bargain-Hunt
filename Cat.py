@@ -1,9 +1,10 @@
 from TextureHandler import Textures
 from Gui import GUI
 from tkinter import *
+from random import randint
 
 class Cat:
-    """ Class for the cat; i.e. the main character of the game..."""
+    """ Class for the cat; a.k.a the main character of the game"""
 
     deaths = 0
     inventory = []
@@ -14,22 +15,27 @@ class Cat:
         self.CatKeyBinds(gui,box)
 
     def death(self):
+        """Drops an item and increases death count"""
         Cat.deaths += 1
-        print(self.name + " #" + str(Cat.deaths) +" died")
-        
-        # add game over? add item drop?       
+
+        if not len(Cat.inventory) == 0:
+            rInt = randint(0,len(Cat.inventory)-1)
+            Cat.inventory.pop(rInt)
+            print(self.name + " #" + str(Cat.deaths) +" died\nAnd dropped an item")
+        else:
+            print(self.name + " #" + str(Cat.deaths) +" died")
 
     def itemPickUp(self, Item):
-        # takes item, the item should be class Item
+        """takes item, the item should be class Item"""
+
         Cat.inventory.append(Item)
         print(str(Item)  + " added to inventory")
 
-    def itemDrop(self, Item):
-        # Drops item
-        Cat.inventory.remove(Item)
-        print(str(Item) + " dropped from inventory")
-
     def openBox(self,gui,box):
+        """Checks if standing on box,
+           and if its true it picks it up"""
+
+        # in case of other map instances
         try:
             cX, cY = gui.canvas.coords(self.catID)
 
@@ -41,31 +47,52 @@ class Cat:
 
     def SortItems(self,criteria,gui,gameover):
         sortList = self.inventory 
-        if criteria == "quality":
+
+        if criteria == "qualityD": # quality high to low
             for i in range(len(sortList)):
-                for j in range(len(sortList)):
-                    if sortList[i].quality > sortList[j].quality:
+                for j in range(i+1,len(sortList)):
+                    if sortList[i].quality < sortList[j].quality:
                         tmp = sortList[i]
                         sortList[i] = sortList[j]
                         sortList[j] = tmp
         
-        elif criteria == "name":
+        if criteria == "qualityA": # quality low to high
             for i in range(len(sortList)):
-                for j in range(len(sortList)):
+                for j in range(i+1,len(sortList)):
+                    if sortList[i].quality > sortList[j].quality:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+
+        elif criteria == "nameD": # name A-Z
+            for i in range(len(sortList)):
+                for j in range(i+1,len(sortList)):
+                    if sortList[i].item > sortList[j].item:
+                        tmp = sortList[i]
+                        sortList[i] = sortList[j]
+                        sortList[j] = tmp
+
+        elif criteria == "nameA": # name Z-A
+            for i in range(len(sortList)):
+                for j in range(i+1,len(sortList)):
                     if sortList[i].item < sortList[j].item:
                         tmp = sortList[i]
                         sortList[i] = sortList[j]
                         sortList[j] = tmp
 
+        # refresh window
         gui.ClearFrame()
         self.showInventory(gui,GameOver = gameover)
 
     def showInventory(self,gui = None, GameOver = False):
-        """Seperate window for score"""
+        """Seperate window for inventory"""
+
+        # in case if the function is called from SortItems
         if gui == None:
             root = Tk()
             gui = GUI(root,"Inventory")
 
+        # if we called this from entering the grass 
         if GameOver:
             label = Label(gui.frame,text = "Game over",fg = "red",font = ("Arial",16,"bold"))
             label.pack(padx = 100)
@@ -77,21 +104,34 @@ class Cat:
             label = Label(gui.frame,text = str(i))
             label.pack(padx = 100)
 
-        button = Button(gui.frame,text = "Sort by quality",command = lambda: self.SortItems("quality",gui,GameOver))
-        button.pack(side = LEFT)
-        button = Button(gui.frame,text = "Sort by name",command = lambda: self.SortItems("name",gui,GameOver))
-        button.pack(side = RIGHT)
+        # Sort button stuff
+        frame = Frame(gui.frame)
+        frame.pack()
 
+        b2 = Button(frame,text = "Name Z-A",command = lambda: self.SortItems("nameA",gui,GameOver))
+        b2.pack(side = RIGHT)
+        b1 = Button(frame,text = "Name A-Z",command = lambda: self.SortItems("nameD",gui,GameOver))
+        b1.pack(side = RIGHT)    
+
+        b3 = Button(frame,text = "Quality high-low",command = lambda: self.SortItems("qualityD",gui,GameOver))
+        b3.pack(side = LEFT)
+        b4 = Button(frame,text = "Quality low-high",command = lambda: self.SortItems("qualityA",gui,GameOver))
+        b4.pack(side = LEFT)
+        
+
+        # Exit for the game!
         if GameOver:
             button = Button(gui.frame,text = "Exit",fg = "red",font = ("Arial",14,"bold"),command = lambda: sys.exit())
             button.pack()
 
             gui.root.protocol("WM_DELETE_WINDOW",lambda:sys.exit()) 
 
+        # Main loop
         gui.root.mainloop
 
     def CatKeyBinds(self,gui,box):
-        # All key bindings associated with Cat
+        """All key bindings associated with Cat"""
+
         gui.root.bind("<Left>", lambda event: self.LeftKey(gui,-50,0))
         gui.root.bind("<Right>", lambda event: self.RightKey(gui,50,0,500))
         gui.root.bind("<Up>", lambda event: self.UpKey(gui,0,-50))
@@ -99,8 +139,10 @@ class Cat:
         gui.root.bind("<x>",lambda event: self.openBox(gui,box))
         gui.root.bind("<c>",lambda event: self.showInventory())
 
+    # Arrow key movement, and checking if not out of border
     def CheckAhead(self,gui,x,y):
         """Prevents from walking on fences and trees"""
+
         cX,cY = gui.canvas.coords(self.catID)
 
         cX += x
