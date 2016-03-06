@@ -1,6 +1,12 @@
 from tkinter import *
 
+"""Faced problems when i needed this class in Main and Cat files
+   So moved it into seperate file"""
+
+
 class GUI:
+    """Gui wrapper, using tkinter"""
+    # pretty much everything is self-explanationary
 
     def __init__(self,root,title):
         self.root = root

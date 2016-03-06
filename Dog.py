@@ -3,6 +3,7 @@ import time
 from math import sqrt
 
 class Dog:
+    """Dog class, handles everything related to dog"""
     
     def __init__(self,diff,gui,photo,Cat):
         """Difficulty,gui, photo of dog, cat"""

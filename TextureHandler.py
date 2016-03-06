@@ -1,6 +1,7 @@
-from tkinter import *
+from tkinter import * # required for PhotoImage
 
-"""Faced problems when i needed this class in Main and Cat files """
+"""Faced problems when i needed this class in Main and Cat files
+   So moved it into seperate file"""
 
 class Textures():
     TextureDict = {} # DICTIONARY POWAAHHH!
