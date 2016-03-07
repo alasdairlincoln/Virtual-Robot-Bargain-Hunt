@@ -2,6 +2,7 @@ from TextureHandler import Textures
 from Gui import GUI
 from tkinter import *
 from random import randint
+from LB import *
 
 class Cat:
     """ Class for the cat; a.k.a the main character of the game"""
@@ -24,6 +25,7 @@ class Cat:
             print(self.name + " #" + str(Cat.deaths) +" died\nAnd dropped an item")
         else:
             print(self.name + " #" + str(Cat.deaths) +" died")
+        
 
     def itemPickUp(self, Item):
         """takes item, the item should be class Item"""
@@ -127,6 +129,7 @@ class Cat:
             gui.root.protocol("WM_DELETE_WINDOW",lambda:sys.exit()) 
 
         # Main loop
+        leader(self) 
         gui.root.mainloop
 
     def CatKeyBinds(self,gui,box):
