@@ -97,7 +97,7 @@ class mExterior(Map):
     def __init__(self, filePath):
         super().__init__(filePath)
 
-    def Execute(self,gui,dMaps,house):  
+    def Execute(self,gui,dMaps,house, Cselection):  
 
         gui.ClearFrame()
         gui.CreateCanvas()
@@ -107,11 +107,15 @@ class mExterior(Map):
         house.CreateObjects(gui.canvas,5,"house","grass")
         house.PlaceAllObjects(gui)
 
-        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
+        if Cselection == 1:
+            cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
 
-        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat)) # changes to inside map, <Return> is "enter" key                 
+        elif Cselection == 2:
+            cat = Cat(gui,Info.name,Textures.TextureDict["dog"],self.ExitX,self.ExitY)
 
-    def preChange(self,coords,gui,dMaps,house,cat): # move into one of the classes
+        gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat, Cselection)) # changes to inside map, <Return> is "enter" key                 
+
+    def preChange(self,coords,gui,dMaps,house,cat, Cselection): # move into one of the classes
         """Takes x,y coords in list,
            Checks if cat is standing on house and if yes proceeds to inside,
            or if the cat is on grass, ends the game"""
@@ -123,7 +127,7 @@ class mExterior(Map):
         bool, ID = house.CheckOverlap(coords[0],coords[1],True)
         self.ExitX, self.ExitY = coords
         if not bool:
-            dMaps["inside"].Execute(gui,dMaps,house,ID)
+            dMaps["inside"].Execute(gui,dMaps,house,ID, Cselection)
 
 class mInterior(Map):
     """Interior map class, 
@@ -132,7 +136,7 @@ class mInterior(Map):
     def __init__(self, filePath):
         super().__init__(filePath)
 
-    def Execute(self,gui,dMaps,house,ID):
+    def Execute(self,gui,dMaps,house,ID, Cselection):
 
         gui.ClearFrame()
         gui.CreateCanvas()
@@ -141,19 +145,24 @@ class mInterior(Map):
 
         house.FillHouse(gui,2,ID)
 
-        cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY,house.List[ID].item)
+        if Cselection == 1:
+            cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY,house.List[ID].item)
+
+        elif Cselection == 2:
+            cat = Cat(gui,Info.name,Textures.TextureDict["dog"],self.ExitX,self.ExitY,house.List[ID].item)
+
         dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat)
 
-        gui.root.bind("<z>",lambda event: self.preChange(cat.catID,gui,dMaps,house,dog)) # changes to ouside map, <Return> is "enter" key
+        gui.root.bind("<z>",lambda event: self.preChange(cat.catID,gui,dMaps,house,dog, Cselection)) # changes to ouside map, <Return> is "enter" key
 
         dog.movement(gui)
 
-    def preChange(self,cat,gui,dMaps,house,dog):
+    def preChange(self,cat,gui,dMaps,house,dog, Cselection):
         """changes into outside when on sofa only :D"""
         x,y = gui.canvas.coords(cat)
         if x == self.ExitX and y == self.ExitY:
             dog.STOP = True # DO NOT REMOVE, UNLESS U WANT MOVING HOUSES ...
-            dMaps["outside"].Execute(gui,dMaps,house)
+            dMaps["outside"].Execute(gui,dMaps,house, Cselection)
 
 class Obj:
     # This would be a Struct if it was written in C++
@@ -285,7 +294,7 @@ class Info:
     availableItems = ["Food","Toys","Mouse","Bells","Catnip","Milk","Trophy"]
     selectedItems = []
 
-    def Transition(diffvar, catname, items,gui):
+    def Transition(diffvar, catname, items,gui, Cselection):
         for i in items:
             if i.get() == 1:
                 Info.selectedItems.append(True)
@@ -294,6 +303,7 @@ class Info:
 
         Info.name = catname.get()
         Info.difficulty = diffvar.get()
+        Info.cat = Cselection.get()
 
         # Setup for rest of the program
         Textures.ReadTexture()
@@ -305,7 +315,7 @@ class Info:
 
         house = House()
     
-        dMaps["outside"].Execute(gui,dMaps,house)
+        dMaps["outside"].Execute(gui,dMaps,house, Info.cat)
 
 def mainmenu(gui):
     """Main menu, allows to choose all the things"""
@@ -345,7 +355,7 @@ def mainmenu(gui):
     catframe = Frame(gui.frame)
     catframe.pack()
 
-    Cselection = 0
+    Cselection = IntVar()
 
     nyan = Radiobutton(catframe, text="Nyan cat", variable = Cselection, value = 1)
     nyan.pack(side = LEFT)
@@ -379,7 +389,7 @@ def mainmenu(gui):
     tutorialbutton.pack()
 
     #Start Button
-    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,gui)) 
+    startbutton = Button(gui.frame, text="PLAY!",font = ("Arial",14,"bold"),fg ='purple',command = lambda: Info.Transition(diffvar,catname,var,gui, Cselection)) 
     startbutton.pack()
 
     gui.CreateEmptySpace(gui.frame)

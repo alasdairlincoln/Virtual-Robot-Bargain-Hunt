@@ -1,4 +1,4 @@
-from tkinter import *
+﻿from tkinter import *
 
 """Faced problems when i needed this class in Main and Cat files
    So moved it into seperate file"""
@@ -41,7 +41,7 @@ class GUI:
     def CreatCheckBox(self,frame,Text):
         check = IntVar()
         checkbox = Checkbutton(frame, text= Text, variable = check)
-        checkbox.pack()
+        checkbox.pack(side = LEFT)
         
         return check
 
