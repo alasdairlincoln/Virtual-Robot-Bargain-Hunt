@@ -111,7 +111,16 @@ class mExterior(Map):
             cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY)
 
         elif Cselection == 2:
-            cat = Cat(gui,Info.name,Textures.TextureDict["dog"],self.ExitX,self.ExitY)
+            cat = Cat(gui,Info.name,Textures.TextureDict["snowball"],self.ExitX,self.ExitY)
+        
+        elif Cselection == 3:
+            cat = Cat(gui,Info.name,Textures.TextureDict["tom"],self.ExitX,self.ExitY)
+
+        elif Cselection == 4:
+            cat = Cat(gui,Info.name,Textures.TextureDict["scratchy"],self.ExitX,self.ExitY)
+
+        elif Cselection == 5:
+            cat = Cat(gui,Info.name,Textures.TextureDict["pink"],self.ExitX,self.ExitY)
 
         gui.root.bind("<z>",lambda event: self.preChange(gui.canvas.coords(cat.catID),gui,dMaps,house,cat, Cselection)) # changes to inside map, <Return> is "enter" key                 
 
@@ -149,7 +158,17 @@ class mInterior(Map):
             cat = Cat(gui,Info.name,Textures.TextureDict["cat"],self.ExitX,self.ExitY,house.List[ID].item)
 
         elif Cselection == 2:
-            cat = Cat(gui,Info.name,Textures.TextureDict["dog"],self.ExitX,self.ExitY,house.List[ID].item)
+            cat = Cat(gui,Info.name,Textures.TextureDict["snowball"],self.ExitX,self.ExitY,house.List[ID].item)
+
+        elif Cselection == 3:
+            cat = Cat(gui,Info.name,Textures.TextureDict["tom"],self.ExitX,self.ExitY,house.List[ID].item)
+
+        elif Cselection == 4:
+            cat = Cat(gui,Info.name,Textures.TextureDict["scratchy"],self.ExitX,self.ExitY,house.List[ID].item)
+
+        elif Cselection == 5:
+            cat = Cat(gui,Info.name,Textures.TextureDict["pink"],self.ExitX,self.ExitY,house.List[ID].item)
+
 
         dog = Dog(int(Info.difficulty),gui,Textures.TextureDict["dog"],cat)
 
@@ -362,8 +381,14 @@ def mainmenu(gui):
     nyan.select()
     snowball = Radiobutton(catframe, text="Snowball II", variable = Cselection, value = 2)
     snowball.pack(side = LEFT)  
+    tom = Radiobutton(catframe, text="Tom", variable = Cselection, value = 3)
+    tom.pack(side = LEFT)
+    scratchy = Radiobutton(catframe, text="Scratchy", variable = Cselection, value = 4)
+    scratchy.pack(side = LEFT)
+    pink = Radiobutton(catframe, text="Pink Panther", variable = Cselection, value = 5)
+    pink.pack(side = LEFT)
        
-
+        
     #select difficutly
     diffvar = IntVar()
         

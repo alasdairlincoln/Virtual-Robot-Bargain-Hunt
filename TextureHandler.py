@@ -27,6 +27,11 @@ class Textures():
 
 
         Textures.TextureDict["cat"] = PhotoImage(file = "Textures/cat.png")
+        Textures.TextureDict["tom"] = PhotoImage(file = "Textures/tom.png")
+        Textures.TextureDict["snowball"] = PhotoImage(file = "Textures/snowball.png")
+        Textures.TextureDict["scratchy"] = PhotoImage(file = "Textures/scratchy.png")
+        Textures.TextureDict["pink"] = PhotoImage(file = "Textures/pink-panther.png")
+
 
     def GetTextureKeys():
         return Textures.TextureDict.keys()
